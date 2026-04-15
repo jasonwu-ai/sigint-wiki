@@ -1,0 +1,26 @@
+---
+interface Props {
+  status: string;
+}
+
+const { status } = Astro.props;
+const statusKeyword = status.replace(/\s*\(.*\)\s*$/, '').trim();
+
+const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
+  'active': { bg: 'bg-amber-500/15', text: 'text-amber-400', dot: 'bg-amber-400' },
+  'active (strain)': { bg: 'bg-orange-500/15', text: 'text-orange-400', dot: 'bg-orange-400' },
+  'escalating': { bg: 'bg-red-500/15', text: 'text-red-400', dot: 'bg-red-400' },
+  'de-escalating': { bg: 'bg-emerald-500/15', text: 'text-emerald-400', dot: 'bg-emerald-400' },
+  'resolved': { bg: 'bg-gray-500/15', text: 'text-gray-400', dot: 'bg-gray-400' },
+};
+
+const normalized = statusKeyword.toLowerCase().trim();
+const config = statusConfig[normalized] || { bg: 'bg-gray-500/15', text: 'text-gray-400', dot: 'bg-gray-400' };
+
+const displayLabel = normalized === 'active (strain)' ? 'Active · Strain' : statusKeyword.charAt(0).toUpperCase() + statusKeyword.slice(1);
+---
+
+<span class:list={['inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium', config.bg, config.text]}>
+  <span class:list={['w-1.5 h-1.5 rounded-full', config.dot]}></span>
+  {displayLabel}
+</span>

@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntityCard from '../../components/cards/EntityCard.astro';
+import { loadAllEntities } from '../../data/loader';
+
+const entities = loadAllEntities();
+
+const types = [...new Set(entities.map((e) => e.type))].filter(Boolean).sort();
+---
+
+<BaseLayout title="Entities" description="Geopolitical actors — countries, leaders, institutions, and organisations tracked by Signal Intelligence">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100 mb-2">Entities</h1>
+    <p class="text-gray-400">Geopolitical actors — countries, leaders, institutions, media outlets, and armed groups.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-3 mb-8" id="filters">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Type</label>
+      <select data-filter="type" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="">All types</option>
+        {types.map((t) => <option value={t}>{t}</option>)}
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Search</label>
+      <input
+        data-filter="search"
+        type="text"
+        placeholder="Filter by name…"
+        class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500"
+      />
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="entity-list">
+    {entities.map((entity) => (
+      <div
+        class="entity-item"
+        data-type={entity.type}
+        data-title={entity.title.toLowerCase()}
+      >
+        <EntityCard entity={entity} />
+      </div>
+    ))}
+  </div>
+
+  <p id="no-results" class="hidden text-center text-gray-500 py-12">No entities match the selected filters.</p>
+</BaseLayout>
+
+<script>
+  const filters = document.querySelectorAll('[data-filter]');
+  const items = document.querySelectorAll('.entity-item');
+  const noResults = document.getElementById('no-results');
+
+  function applyFilters() {
+    const active: Record<string, string> = {};
+    filters.forEach((el) => {
+      const input = el as HTMLInputElement | HTMLSelectElement;
+      active[input.dataset.filter!] = input.value.toLowerCase();
+    });
+
+    let visible = 0;
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const type = el.dataset.type || '';
+      const title = el.dataset.title || '';
+
+      let show = true;
+      if (active.type && type !== active.type) show = false;
+      if (active.search && !title.includes(active.search)) show = false;
+
+      el.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    if (noResults) noResults.classList.toggle('hidden', visible > 0);
+  }
+
+  filters.forEach((el) => {
+    el.addEventListener('change', applyFilters);
+    el.addEventListener('input', applyFilters);
+  });
+</script>

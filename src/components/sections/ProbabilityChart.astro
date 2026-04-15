@@ -1,0 +1,28 @@
+---
+interface Props {
+  historySvg: string | null;
+  currentProbability: { yes: number; no: number };
+}
+
+const { historySvg, currentProbability } = Astro.props;
+---
+
+<div class="space-y-4">
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-500 uppercase tracking-wider">Yes</span>
+      <span class="text-2xl font-bold font-mono text-brand-400 tabular-nums">{currentProbability.yes}%</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-500 uppercase tracking-wider">No</span>
+      <span class="text-2xl font-bold font-mono text-gray-400 tabular-nums">{currentProbability.no}%</span>
+    </div>
+  </div>
+  {historySvg ? (
+    <div class="rounded-xl overflow-hidden border border-white/5" set:html={historySvg} />
+  ) : (
+    <div class="py-6 px-4 rounded-xl border border-dashed border-white/10 text-gray-500 text-sm italic text-center">
+      Insufficient history data for chart
+    </div>
+  )}
+</div>

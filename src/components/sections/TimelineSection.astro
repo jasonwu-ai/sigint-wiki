@@ -1,0 +1,40 @@
+---
+interface Props {
+  timeline: string[];
+}
+const { timeline } = Astro.props;
+function parseTimelineEntry(entry: string): { date: string; sortKey: string; text: string; attribution: string } {
+  const dtMatch = /^(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?\s*/.exec(entry);
+  const date = dtMatch ? dtMatch[1] : '';
+  const time = dtMatch && dtMatch[2] ? dtMatch[2] : '00:00';
+  const sortKey = date ? date + 'T' + time : '';
+  let rest = dtMatch ? entry.slice(dtMatch[0].length) : entry;
+  const dashIndex = rest.lastIndexOf('—');
+  let text = rest;
+  let attribution = '';
+  if (dashIndex > 20) {
+    text = rest.slice(0, dashIndex).trim();
+    attribution = rest.slice(dashIndex + 1).trim();
+  }
+  return { date, sortKey, text, attribution };
+}
+function renderAttribution(attr: string): string {
+  // Convert [Name](url) markdown links to HTML <a> tags
+  return attr.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 underline decoration-brand-500/30">$1</a>');
+}
+const entries = timeline.map(parseTimelineEntry).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+---
+<div class="relative pl-6 border-l-2 border-brand-500/20 space-y-6">
+  {entries.map((entry) => (
+    <div class="relative">
+      <div class="absolute -left-[1.65rem] top-1.5 w-2.5 h-2.5 rounded-full bg-brand-500 border-2 border-surface"></div>
+      {entry.date && (
+        <time class="text-xs font-mono text-brand-400 font-medium">{entry.date}</time>
+      )}
+      <p class="text-sm text-gray-300 mt-1 leading-relaxed">{entry.text}</p>
+      {entry.attribution && (
+        <p class="text-xs text-gray-500 mt-1" set:html={renderAttribution(entry.attribution)} />
+      )}
+    </div>
+  ))}
+</div>

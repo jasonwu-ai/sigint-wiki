@@ -1,0 +1,22 @@
+---
+interface Props {
+  type: string;
+}
+
+const { type } = Astro.props;
+
+const typeConfig: Record<string, { bg: string; text: string }> = {
+  'country': { bg: 'bg-blue-500/15', text: 'text-blue-400' },
+  'leader': { bg: 'bg-purple-500/15', text: 'text-purple-400' },
+  'institution': { bg: 'bg-teal-500/15', text: 'text-teal-400' },
+  'media outlet': { bg: 'bg-indigo-500/15', text: 'text-indigo-400' },
+  'armed group': { bg: 'bg-red-500/15', text: 'text-red-400' },
+};
+
+const normalized = type.toLowerCase().trim();
+const config = typeConfig[normalized] || { bg: 'bg-gray-500/15', text: 'text-gray-400' };
+---
+
+<span class:list={['inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium', config.bg, config.text]}>
+  {type}
+</span>

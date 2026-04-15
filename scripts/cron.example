@@ -1,0 +1,6 @@
+# Signal Intelligence Wiki — automated rebuild cron entry
+# Rebuilds the site every hour so pages reflect latest intelligence data.
+# Add to crontab with: crontab -e
+
+# Run at minute 0 of every hour
+0 * * * * /home/paperclip/signal-intelligence/site/scripts/build.sh >> /var/log/wiki-build.log 2>&1

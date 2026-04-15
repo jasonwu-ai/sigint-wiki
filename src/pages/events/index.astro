@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EventCard from '../../components/cards/EventCard.astro';
+import { loadAllEvents } from '../../data/loader';
+
+const events = loadAllEvents();
+
+const statuses = [...new Set(events.map((e) => e.status))].sort();
+const theatres = [...new Set(events.map((e) => e.theatre))].filter(Boolean).sort();
+const allThemes = [...new Set(events.flatMap((e) => e.themes))].sort();
+---
+
+<BaseLayout title="Events" description="Geopolitical events tracked and analysed by Signal Intelligence">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100 mb-2">Events</h1>
+    <p class="text-gray-400">Active geopolitical situations monitored across global theatres.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-3 mb-8" id="filters">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Status</label>
+      <select data-filter="status" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="">All statuses</option>
+        {statuses.map((s) => <option value={s}>{s}</option>)}
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Theatre</label>
+      <select data-filter="theatre" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="">All theatres</option>
+        {theatres.map((t) => <option value={t}>{t}</option>)}
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Theme</label>
+      <select data-filter="theme" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="">All themes</option>
+        {allThemes.map((t) => <option value={t}>{t}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2" id="event-list">
+    {events.map((event) => (
+      <div
+        class="event-item"
+        data-status={event.status}
+        data-theatre={event.theatre}
+        data-themes={event.themes.join(',')}
+      >
+        <EventCard event={event} />
+      </div>
+    ))}
+  </div>
+
+  <p id="no-results" class="hidden text-center text-gray-500 py-12">No events match the selected filters.</p>
+</BaseLayout>
+
+<script>
+  const filters = document.querySelectorAll('[data-filter]');
+  const items = document.querySelectorAll('.event-item');
+  const noResults = document.getElementById('no-results');
+
+  function applyFilters() {
+    const active: Record<string, string> = {};
+    filters.forEach((el) => {
+      const select = el as HTMLSelectElement;
+      active[select.dataset.filter!] = select.value;
+    });
+
+    let visible = 0;
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const status = el.dataset.status || '';
+      const theatre = el.dataset.theatre || '';
+      const themes = el.dataset.themes || '';
+
+      let show = true;
+      if (active.status && status !== active.status) show = false;
+      if (active.theatre && theatre !== active.theatre) show = false;
+      if (active.theme && !themes.split(',').includes(active.theme)) show = false;
+
+      el.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    if (noResults) noResults.classList.toggle('hidden', visible > 0);
+  }
+
+  filters.forEach((el) => el.addEventListener('change', applyFilters));
+</script>

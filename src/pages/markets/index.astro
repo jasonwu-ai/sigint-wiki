@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MarketCard from '../../components/cards/MarketCard.astro';
+import { loadAllMarkets } from '../../data/loader';
+
+const markets = loadAllMarkets();
+const sortedByVolume = [...markets].sort((a, b) => {
+  if (a.expired !== b.expired) return a.expired ? 1 : -1;
+  return b.volumeRaw - a.volumeRaw;
+});
+---
+
+<BaseLayout title="Markets" description="Geopolitical prediction markets tracked by Signal Intelligence — probability analysis and trend data">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100 mb-2">Markets</h1>
+    <p class="text-gray-400">Geopolitical prediction markets with probability tracking and trend data.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-3 mb-8" id="filters">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Sort by</label>
+      <select data-filter="sort" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="volume">Volume (high → low)</option>
+        <option value="probability-asc">Probability (low → high)</option>
+        <option value="probability-desc">Probability (high → low)</option>
+      </select>
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Filter</label>
+      <label class="flex items-center gap-2 bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 cursor-pointer hover:border-brand-500/30">
+        <input type="checkbox" id="show-expired" class="accent-brand-500" />
+        <span>Show expired</span>
+      </label>
+    </div>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" id="market-list">
+    {sortedByVolume.map((market) => (
+      <div
+        class="market-item"
+        data-volume={market.volumeRaw}
+        data-probability={market.currentProbability.yes}
+        data-expired={market.expired ? '1' : '0'}
+      >
+        <MarketCard market={market} />
+      </div>
+    ))}
+  </div>
+</BaseLayout>
+
+<script>
+  const sortSelect = document.querySelector('[data-filter="sort"]') as HTMLSelectElement;
+  const expiredToggle = document.getElementById('show-expired') as HTMLInputElement;
+  const list = document.getElementById('market-list');
+  const items = Array.from(document.querySelectorAll('.market-item'));
+
+  function applyFilters() {
+    const showExpired = expiredToggle?.checked || false;
+    items.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      if (htmlEl.dataset.expired === '1' && !showExpired) {
+        htmlEl.style.display = 'none';
+      } else {
+        htmlEl.style.display = '';
+      }
+    });
+    applySort();
+  }
+
+  function applySort() {
+    const sortBy = sortSelect?.value || 'volume';
+    const sorted = [...items].sort((a, b) => {
+      const elA = a as HTMLElement;
+      const elB = b as HTMLElement;
+      const expA = elA.dataset.expired === '1' ? 1 : 0;
+      const expB = elB.dataset.expired === '1' ? 1 : 0;
+      if (expA !== expB) return expA - expB;
+      if (sortBy === 'volume') {
+        return parseFloat(elB.dataset.volume || '0') - parseFloat(elA.dataset.volume || '0');
+      } else if (sortBy === 'probability-asc') {
+        return parseFloat(elA.dataset.probability || '0') - parseFloat(elB.dataset.probability || '0');
+      } else {
+        return parseFloat(elB.dataset.probability || '0') - parseFloat(elA.dataset.probability || '0');
+      }
+    });
+    sorted.forEach((el) => list?.appendChild(el));
+  }
+
+  sortSelect?.addEventListener('change', applySort);
+  expiredToggle?.addEventListener('change', applyFilters);
+  applyFilters();
+</script>

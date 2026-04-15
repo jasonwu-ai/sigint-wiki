@@ -1,0 +1,40 @@
+---
+import type { WikiEvent } from '../../data/types';
+import StatusBadge from '../badges/StatusBadge.astro';
+
+interface Props {
+  event: WikiEvent;
+}
+
+const { event } = Astro.props;
+
+const latestTimeline = event.timeline.length > 0
+  ? event.timeline[event.timeline.length - 1].split('—')[0].trim()
+  : null;
+---
+
+<a href={`/events/${event.slug}`} class="block group">
+  <article class="p-5 rounded-xl bg-surface-raised border border-white/5 hover:border-brand-500/30 hover:bg-surface-overlay transition-all duration-200">
+    <div class="flex items-start justify-between gap-3 mb-3">
+      <h3 class="text-gray-100 font-semibold text-base leading-snug group-hover:text-brand-400 transition-colors">{event.title}</h3>
+      <StatusBadge status={event.status} />
+    </div>
+    <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-3">
+      <span class="inline-flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        {event.theatre}
+      </span>
+      {event.themes.slice(0, 3).map((theme) => (
+        <span class="px-2 py-0.5 rounded-full bg-white/5 text-gray-400">{theme}</span>
+      ))}
+    </div>
+    <div class="flex items-center justify-between">
+      {latestTimeline && (
+        <p class="text-sm text-gray-400 line-clamp-2 flex-1">{latestTimeline.replace(/^\d{4}-\d{2}-\d{2}\s*/, '')}</p>
+      )}
+      {event.lastUpdated && (
+        <span class="text-xs text-gray-600 font-mono ml-2 shrink-0">{event.lastUpdated}</span>
+      )}
+    </div>
+  </article>
+</a>

@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Methodology" description="How Signal Intelligence collects, processes, and analyses geopolitical intelligence">
+  <div class="max-w-3xl">
+    <h1 class="text-3xl font-bold text-gray-100 mb-6">Methodology</h1>
+
+    <div class="space-y-8 text-gray-300 leading-relaxed">
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Data Sources</h2>
+        <p class="mb-4">Signal Intelligence aggregates data from multiple RSS feeds spanning different geopolitical perspectives:</p>
+        <ul class="list-disc pl-5 space-y-2 text-sm">
+          <li><strong>Western media</strong> — BBC, Reuters, and other major English-language outlets</li>
+          <li><strong>China-aligned media</strong> — South China Morning Post and related outlets</li>
+          <li><strong>Russia-aligned media</strong> — TASS and related outlets</li>
+          <li><strong>Middle East media</strong> — Al Jazeera and regional sources</li>
+          <li><strong>Indian media</strong> — The Hindu and related outlets</li>
+          <li><strong>Think tanks</strong> — Policy analysis and research institutions</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Processing Pipeline</h2>
+        <ol class="list-decimal pl-5 space-y-2 text-sm">
+          <li><strong>Ingestion</strong> — RSS feeds are polled every 60–90 minutes</li>
+          <li><strong>Deduplication</strong> — Similar articles across sources are grouped</li>
+          <li><strong>Classification</strong> — Items are tagged by theatre, themes, and geopolitical relevance</li>
+          <li><strong>Entity extraction</strong> — Named entities (countries, leaders, organisations) are identified</li>
+          <li><strong>Brief generation</strong> — AI synthesises developments into structured intelligence briefs</li>
+          <li><strong>Wiki population</strong> — Event, entity, narrative, and market pages are created and updated</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Prediction Market Data</h2>
+        <p class="text-sm">Market probabilities and volumes are sourced from <strong>Polymarket</strong>, sampled every 30 minutes. History charts reflect all sampled data points. Markets are filtered for geopolitical relevance before inclusion.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Narrative Analysis</h2>
+        <p class="text-sm">Narrative analysis identifies how different sources frame the same events. We track framing choices, emphasis differences, and counter-narratives across geopolitical alignments. This is not a claim of objective truth — it is a map of how information is being presented.</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">Limitations</h2>
+        <ul class="list-disc pl-5 space-y-2 text-sm">
+          <li>Source coverage is limited to English-language and translated feeds</li>
+          <li>AI-generated analysis may contain errors or miss important context</li>
+          <li>Entity profiles are enriched over time — many profiles are incomplete</li>
+          <li>Market data reflects public prediction markets, not expert consensus</li>
+          <li>Updates occur on a cadence, not in real-time</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-gray-200 mb-3">About</h2>
+        <p class="text-sm">Signal Intelligence Wiki is built and maintained as a geopolitical monitoring tool. It is designed for analysts, researchers, and observers who need to track how geopolitical events develop across different information environments.</p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

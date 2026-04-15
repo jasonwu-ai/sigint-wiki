@@ -1,0 +1,35 @@
+---
+import type { CrossReferences } from '../../data/resolvers';
+import { resolveSlug } from '../../data/resolvers';
+import EmptyState from '../shared/EmptyState.astro';
+
+interface Props {
+  slugs: string[];
+  xref: CrossReferences;
+  emptyMessage?: string;
+}
+
+const { slugs, xref, emptyMessage = 'No related markets' } = Astro.props;
+const resolved = slugs.map((slug) => ({ slug, ...resolveSlug(slug, xref) }));
+---
+
+{slugs.length === 0 ? (
+  <EmptyState message={emptyMessage} />
+) : (
+  <div class="flex flex-wrap gap-2">
+    {resolved.map((item) =>
+      item.exists ? (
+        <a
+          href={item.href}
+          class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-500/10 text-brand-400 text-sm hover:bg-brand-500/20 transition-colors"
+        >
+          {item.label}
+        </a>
+      ) : (
+        <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-white/5 text-gray-500 text-sm">
+          {item.label}
+        </span>
+      )
+    )}
+  </div>
+)}

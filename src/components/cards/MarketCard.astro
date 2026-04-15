@@ -1,0 +1,31 @@
+---
+import type { WikiMarket } from '../../data/types';
+import { formatVolume } from '../../data/svg-chart';
+
+interface Props {
+  market: WikiMarket;
+}
+
+const { market } = Astro.props;
+const yesPercent = market.currentProbability.yes;
+const noPercent = market.currentProbability.no;
+---
+
+<a href={`/markets/${market.slug}`} class="block group">
+  <article class="p-5 rounded-xl bg-surface-raised border border-white/5 hover:border-brand-500/30 hover:bg-surface-overlay transition-all duration-200 relative">
+    {market.expired && (
+      <span class="absolute top-3 right-3 text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-gray-700 text-gray-400">Expired</span>
+    )}
+    <h3 class={`text-gray-100 font-semibold text-base leading-snug mb-3 group-hover:text-brand-400 transition-colors pr-20 ${market.expired ? 'opacity-60' : ''}`}>{market.title}</h3>
+    <div class="flex items-center gap-3 mb-3">
+      <div class="flex-1 h-2 rounded-full bg-gray-800 overflow-hidden">
+        <div class={`h-full rounded-full transition-all ${market.expired ? 'bg-gray-600' : 'bg-brand-500'}`} style={`width: ${yesPercent}%`}></div>
+      </div>
+      <span class={`text-sm font-mono font-medium tabular-nums ${market.expired ? 'text-gray-500' : 'text-brand-400'}`}>{yesPercent}%</span>
+    </div>
+    <div class="flex items-center justify-between text-xs text-gray-500">
+      <span>Vol: {formatVolume(market.volumeRaw)}</span>
+      <span class="text-gray-600">{market.history.length} data points</span>
+    </div>
+  </article>
+</a>

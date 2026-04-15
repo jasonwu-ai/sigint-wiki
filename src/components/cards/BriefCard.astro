@@ -1,0 +1,36 @@
+---
+interface Props {
+  brief: {
+    date: string;
+    time: string;
+    title: string;
+    summary: string | null;
+  };
+}
+
+const { brief } = Astro.props;
+
+const timeFormatted = brief.time.length >= 4
+  ? `${brief.time.slice(0, 2)}:${brief.time.slice(2, 4)} UTC`
+  : brief.time;
+
+const summaryPreview = brief.summary
+  ? brief.summary.length > 160
+    ? brief.summary.slice(0, 160) + '…'
+    : brief.summary
+  : null;
+---
+
+<a href={`/briefs/${brief.date}`} class="block group">
+  <article class="p-5 rounded-xl bg-surface-raised border border-white/5 hover:border-brand-500/30 hover:bg-surface-overlay transition-all duration-200">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="text-xs font-mono text-gray-500">{brief.date}</span>
+      <span class="text-xs text-gray-600">·</span>
+      <span class="text-xs font-mono text-brand-400">{timeFormatted}</span>
+    </div>
+    <h3 class="text-gray-100 font-semibold text-base leading-snug mb-2 group-hover:text-brand-400 transition-colors">{brief.title}</h3>
+    {summaryPreview && (
+      <p class="text-sm text-gray-400 line-clamp-2">{summaryPreview}</p>
+    )}
+  </article>
+</a>

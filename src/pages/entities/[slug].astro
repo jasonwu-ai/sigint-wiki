@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TypeBadge from '../../components/badges/TypeBadge.astro';
+import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
+import EmptyState from '../../components/shared/EmptyState.astro';
+import { loadAllEntities, loadAllEvents } from '../../data/loader';
+import { buildCrossReferences } from '../../data/resolvers';
+import type { CrossReferences } from '../../data/resolvers';
+import { marked } from 'marked';
+
+export function getStaticPaths() {
+  const entities = loadAllEntities();
+  return entities.map((entity) => ({
+    params: { slug: entity.slug },
+    props: { entity },
+  }));
+}
+
+const { entity } = Astro.props;
+const xref = buildCrossReferences();
+const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
+
+const hasAnyContent = entity.objectives || entity.claimsAndTrackRecord || entity.divergences || entity.connections;
+---
+
+<BaseLayout
+  title={entity.title}
+  description={`${entity.type} — ${entity.affiliations || 'Signal Intelligence entity profile'}`}
+  breadcrumbs={[
+    { label: 'Entities', href: '/entities' },
+    { label: entity.title },
+  ]}
+>
+  <div class="mb-8">
+    <div class="flex flex-wrap items-start gap-3 mb-3">
+      <h1 class="text-3xl font-bold text-gray-100 leading-tight">{entity.title}</h1>
+      <TypeBadge type={entity.type} />
+    </div>
+    {entity.affiliations && (
+      <p class="text-gray-400">{entity.affiliations}</p>
+    )}
+  </div>
+
+  <div class="space-y-8">
+    {hasAnyContent ? (
+      <>
+        {entity.objectives && (
+          <section>
+            <h2 class="text-lg font-semibold text-gray-200 mb-3">Objectives</h2>
+            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
+              <div set:html={marked.parse(entity.objectives || '')} />
+            </div>
+          </section>
+        )}
+
+        {entity.claimsAndTrackRecord && (
+          <section>
+            <h2 class="text-lg font-semibold text-gray-200 mb-3">Claims & Track Record</h2>
+            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
+              <div set:html={marked.parse(entity.claimsAndTrackRecord || '')} />
+            </div>
+          </section>
+        )}
+
+        {entity.divergences && (
+          <section>
+            <h2 class="text-lg font-semibold text-gray-200 mb-3">Divergences</h2>
+            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
+              <div set:html={marked.parse(entity.divergences || '')} />
+            </div>
+          </section>
+        )}
+
+        {entity.connections && (
+          <section>
+            <h2 class="text-lg font-semibold text-gray-200 mb-3">Connections</h2>
+            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
+              <div set:html={marked.parse(entity.connections || '')} />
+            </div>
+          </section>
+        )}
+      </>
+    ) : (
+      <EmptyState message="Profile data not yet available for this entity." />
+    )}
+
+    <section>
+      <h2 class="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Mentioned in Events
+      </h2>
+      {mentioningEvents.length > 0 ? (
+        <RelatedEvents
+          slugs={mentioningEvents.map((e) => e.slug)}
+          xref={xref}
+          emptyMessage="Not yet mentioned in any tracked events"
+        />
+      ) : (
+        <EmptyState message="Not yet mentioned in any tracked events" />
+      )}
+    </section>
+  </div>
+</BaseLayout>

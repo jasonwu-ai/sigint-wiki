@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NarrativeCard from '../../components/cards/NarrativeCard.astro';
+import { loadAllNarratives } from '../../data/loader';
+
+const narratives = loadAllNarratives();
+
+const allActors = [...new Set(narratives.flatMap((n) => n.pushedBy))].sort();
+---
+
+<BaseLayout title="Narratives" description="Framing analysis and narrative tracking — how different actors frame geopolitical events">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-100 mb-2">Narratives</h1>
+    <p class="text-gray-400">How different actors frame geopolitical events — narrative tracking and counter-narrative analysis.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-3 mb-8" id="filters">
+    <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Actor</label>
+      <select data-filter="actor" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="">All actors</option>
+        {allActors.map((a) => <option value={a}>{a}</option>)}
+      </select>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2" id="narrative-list">
+    {narratives.map((narrative) => (
+      <div
+        class="narrative-item"
+        data-actors={narrative.pushedBy.join(',')}
+      >
+        <NarrativeCard narrative={narrative} />
+      </div>
+    ))}
+  </div>
+
+  <p id="no-results" class="hidden text-center text-gray-500 py-12">No narratives match the selected filters.</p>
+</BaseLayout>
+
+<script>
+  const filters = document.querySelectorAll('[data-filter]');
+  const items = document.querySelectorAll('.narrative-item');
+  const noResults = document.getElementById('no-results');
+
+  function applyFilters() {
+    const active: Record<string, string> = {};
+    filters.forEach((el) => {
+      const select = el as HTMLSelectElement;
+      active[select.dataset.filter!] = select.value;
+    });
+
+    let visible = 0;
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const actors = el.dataset.actors || '';
+
+      let show = true;
+      if (active.actor && !actors.split(',').includes(active.actor)) show = false;
+
+      el.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    if (noResults) noResults.classList.toggle('hidden', visible > 0);
+  }
+
+  filters.forEach((el) => el.addEventListener('change', applyFilters));
+</script>

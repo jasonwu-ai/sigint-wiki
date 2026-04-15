@@ -1,0 +1,12 @@
+wiki.zyoulabs.ai {
+	root * /home/paperclip/signal-intelligence/site/dist
+	file_server
+	try_files {path} {path}.html /404.html
+	encode gzip
+
+	header {
+		Cache-Control "public, max-age=300"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+	}
+}
