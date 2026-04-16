@@ -16,18 +16,16 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: site
 
       - name: Build site
         env:
           WIKI_DATA_ROOT: /home/paperclip/signal-intelligence
           BUILT_AT: ${{ github.event.head_commit.timestamp }}
         run: npm run build
-        working-directory: site
 
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.0.0
