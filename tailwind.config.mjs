@@ -17,6 +17,7 @@ export default {
         recent:  '#f59e0b',
         stale:   '#62666d',
         type: {
+          body:      '#d0d6e0',
           event:     '#f59e0b',
           entity:    '#3b82f6',
           market:    '#10b981',
