@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TypeBadge from '../../components/badges/TypeBadge.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
+import FooterMeta from '../../components/shared/FooterMeta.astro';
 import { loadAllEntities, loadAllEvents } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
 import type { CrossReferences } from '../../data/resolvers';
@@ -100,4 +101,11 @@ const hasAnyContent = entity.objectives || entity.claimsAndTrackRecord || entity
       )}
     </section>
   </div>
+
+  <FooterMeta
+    type="entity"
+    updatedBy="Analyst"
+    updatedAt={entity.lastUpdated || undefined}
+    sourceCount={mentioningEvents.length}
+  />
 </BaseLayout>
