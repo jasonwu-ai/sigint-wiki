@@ -1,6 +1,7 @@
 ---
 import type { WikiEntity } from '../../data/types';
 import TypeBadge from '../badges/TypeBadge.astro';
+import FreshnessBadge from '../badges/FreshnessBadge.astro';
 
 interface Props {
   entity: WikiEntity;
@@ -20,8 +21,6 @@ const { entity } = Astro.props;
     ) : (
       <p class="text-sm text-gray-600 italic">Profile pending enrichment</p>
     )}
-    {entity.lastUpdated && (
-      <p class="text-xs text-gray-600 font-mono mt-2">Updated {entity.lastUpdated}</p>
-    )}
+    <FreshnessBadge lastUpdated={entity.lastUpdated} />
   </article>
 </a>

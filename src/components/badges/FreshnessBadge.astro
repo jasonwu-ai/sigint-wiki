@@ -1,0 +1,29 @@
+---
+interface Props {
+  lastUpdated: string | null; // ISO date string 'YYYY-MM-DD'
+  showLabel?: boolean;
+}
+
+const { lastUpdated, showLabel = true } = Astro.props;
+
+function getFreshness(dateStr: string | null): { color: string; label: string; dot: string } {
+  if (!dateStr) return { color: 'var(--stale)', label: 'Unknown', dot: 'bg-stale' };
+  
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  const diffDays = diffHours / 24;
+
+  if (diffHours < 24) return { color: 'var(--fresh)', label: 'Updated today', dot: 'bg-fresh' };
+  if (diffDays < 7)  return { color: 'var(--recent)', label: 'Updated this week', dot: 'bg-recent' };
+  return { color: 'var(--stale)', label: `Updated ${Math.floor(diffDays)}d ago`, dot: 'bg-stale' };
+}
+
+const freshness = getFreshness(lastUpdated);
+---
+
+<span class="inline-flex items-center gap-1.5 text-xs font-mono" style={`color: ${freshness.color}`}>
+  <span class={`w-1.5 h-1.5 rounded-full ${freshness.dot}`}></span>
+  {showLabel && <span>{freshness.label}</span>}
+</span>
