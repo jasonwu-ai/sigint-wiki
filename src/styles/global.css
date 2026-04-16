@@ -2,8 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;590;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @layer base {
+  :root {
+    --bg-canvas:     #08090a;
+    --bg-panel:      #0f1011;
+    --bg-surface:    #191a1b;
+    --bg-elevated:   #28282c;
+    --accent:        #14b8a6;
+    --accent-hover:  #2dd4bf;
+    --accent-muted:  rgba(20, 184, 166, 0.15);
+    --text-primary:  #f7f8f8;
+    --text-body:     #d0d6e0;
+    --text-muted:    #8a8f98;
+    --text-faint:    #62666d;
+    --border:        rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --fresh:         #10b981;
+    --recent:        #f59e0b;
+    --stale:         #62666d;
+    --type-event:    #f59e0b;
+    --type-entity:   #3b82f6;
+    --type-market:    #10b981;
+    --type-narrative: #a855f7;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-surface text-gray-200 antialiased;
+    background-color: var(--bg-canvas);
+    color: var(--text-body);
+    antialiased: antialiased;
   }
 }
