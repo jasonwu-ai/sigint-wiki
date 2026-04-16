@@ -30,6 +30,10 @@ const hasAnyContent = entity.objectives || entity.claimsAndTrackRecord || entity
     { label: 'Entities', href: '/entities' },
     { label: entity.title },
   ]}
+  footerType="entity"
+  footerUpdatedBy="Collector"
+  footerUpdatedAt={new Date().toISOString().slice(0, 10)}
+  footerSourceCount={mentioningEvents.length}
 >
   <div class="mb-8">
     <div class="flex flex-wrap items-start gap-3 mb-3">

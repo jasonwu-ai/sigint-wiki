@@ -8,6 +8,10 @@ interface Props {
   description?: string;
   ogImage?: string;
   breadcrumbs?: Array<{ label: string; href?: string }>;
+  footerUpdatedBy?: string;
+  footerUpdatedAt?: string | null;
+  footerSourceCount?: number;
+  footerType?: string;
 }
 
 const {
@@ -15,6 +19,10 @@ const {
   description = 'Signal Intelligence Wiki - Geopolitical event tracking, prediction markets, and narrative analysis',
   ogImage,
   breadcrumbs,
+  footerUpdatedBy,
+  footerUpdatedAt,
+  footerSourceCount,
+  footerType,
 } = Astro.props;
 
 const siteTitle = title === 'Signal Intelligence Wiki' ? title : (title + ' - Signal Intelligence Wiki');
@@ -71,6 +79,11 @@ const resolvedOgImage = ogImage || '/og-default.png';
       <slot />
     </main>
 
-    <FooterMeta type="page" />
+    <FooterMeta
+      type={footerType || 'page'}
+      updatedBy={footerUpdatedBy}
+      updatedAt={footerUpdatedAt}
+      sourceCount={footerSourceCount}
+    />
   </body>
 </html>
