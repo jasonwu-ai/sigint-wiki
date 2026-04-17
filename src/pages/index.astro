@@ -1,185 +1,118 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/cards/EventCard.astro';
+import EntityCard from '../components/cards/EntityCard.astro';
 import MarketCard from '../components/cards/MarketCard.astro';
-import EmptyState from '../components/shared/EmptyState.astro';
-import { loadAllEvents, loadLatestBrief, loadLatestDailyBrief, loadMarketMovers, loadAllEntities, loadAllNarratives, loadAllMarkets } from '../data/loader';
-import { formatVolume } from '../data/svg-chart';
+import { loadAllEvents, loadAllEntities, loadAllMarkets, loadLatestBrief } from '../data/loader';
 
-const dailyBrief = loadLatestDailyBrief();
-const brief = loadLatestBrief();
-const devCount = brief?.topDevelopments 
-  ? (brief.topDevelopments.match(/^### /gm) || []).length 
-  : 0;
-const movers = loadMarketMovers();
 const events = loadAllEvents();
 const entities = loadAllEntities();
-const narratives = loadAllNarratives();
 const markets = loadAllMarkets();
+const brief = loadLatestBrief();
 
-const recentEvents = events
-  .filter((e) => e.timeline.length > 0)
-  .slice(0, 5);
+// Latest event with a timeline (events are already sorted by lastUpdated desc)
+const latestEvent = events.find((e) => e.timeline.length > 0) || null;
 
-const topMarkets = movers.topGeoMarkets.slice(0, 5);
-const gold = movers.commodities?.gold_usd;
-const forex = movers.commodities?.forex_usd || {};
-const treasury = movers.treasury || {};
-const keyFx = ['EUR', 'CNY', 'RUB', 'JPY', 'GBP'].filter(c => c in forex);
+// Latest entity (entities are sorted by lastUpdated desc)
+const latestEntity = entities[0] || null;
+
+// Highest volume market
+const topVolumeMarket = [...markets].sort((a, b) => b.volumeRaw - a.volumeRaw)[0] || null;
+
+// Relative time from latest brief
+function timeAgo(dateStr: string, timeStr: string): string {
+  const year = parseInt(dateStr.slice(0, 4), 10);
+  const month = parseInt(dateStr.slice(5, 7), 10) - 1;
+  const day = parseInt(dateStr.slice(8, 10), 10);
+  const hours = parseInt(timeStr.slice(0, 2), 10);
+  const minutes = parseInt(timeStr.slice(2, 4), 10);
+  const then = new Date(Date.UTC(year, month, day, hours, minutes));
+  const now = new Date();
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
+const lastUpdatedText = brief
+  ? `Last updated ${timeAgo(brief.date, brief.time)}`
+  : 'Data refreshing shortly';
 ---
 
 <BaseLayout title="Signal Intelligence Wiki" description="Real-time geopolitical event tracking, prediction market analysis, and narrative intelligence">
 
-  <div class="grid gap-8 lg:grid-cols-3">
-    <div class="lg:col-span-2 space-y-8">
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold text-gray-200 flex items-center gap-2">
-            <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
-            Daily Intelligence Brief
-          </h2>
-          {dailyBrief && (
-            <a href={`/briefs/${dailyBrief.date}`} class="text-sm text-brand-400 hover:text-brand-300 transition-colors">
-              Read full analysis →
-            </a>
-          )}
-        </div>
-        {dailyBrief ? (
-          <div class="p-6 rounded-xl bg-surface-raised border border-white/5">
-            <div class="flex items-center gap-2 mb-3">
-              <span class="text-xs font-mono text-gray-500">{dailyBrief.date}</span>
-              <span class="text-xs text-gray-600">&middot;</span>
-              <span class="text-xs font-mono text-brand-400">{dailyBrief.generated.slice(11,16)} UTC</span>
-              {dailyBrief.confidenceFlag !== 'normal' && (
-                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">{dailyBrief.confidenceFlag}</span>
-              )}
-            </div>
-            <div class="text-sm text-gray-300 leading-relaxed mb-4 space-y-2">
-              {dailyBrief.topDevelopments.split('\n').filter(l => l.startsWith('- ')).slice(0, 3).map((line) => (
-                <p class="text-sm text-gray-300">{line.replace(/^- \*\*[^*]+\*\*:?\s*/, '').replace(/^- /, '')}</p>
-              ))}
-            </div>
-            <div class="flex items-center gap-4 text-xs text-gray-500">
-              <span><span class="text-brand-400">{dailyBrief.eventsAnalysed.length}</span> events analysed</span>
-              <span><span class="text-blue-400">{dailyBrief.entitiesReferenced.length}</span> entities referenced</span>
-              <span><span class="text-teal-400">{dailyBrief.marketsReferenced.length}</span> markets tracked</span>
-            </div>
-          </div>
-        ) : brief ? (
-          <div class="p-6 rounded-xl bg-surface-raised border border-white/5">
-            <p class="text-sm text-gray-500 italic">Daily analysis pending — showing latest data collection.</p>
-            <div class="flex items-center gap-2 mt-3">
-              <span class="text-xs font-mono text-gray-500">{brief.date}</span>
-              <span class="text-xs text-gray-600">&middot;</span>
-              <span class="text-xs font-mono text-brand-400">{brief.time.length >= 4 ? `${brief.time.slice(0,2)}:${brief.time.slice(2,4)} UTC` : brief.time}</span>
-            </div>
-          </div>
-        ) : (
-          <EmptyState message="No briefs available yet" />
-        )}
-      </section>
+  <!-- HERO SECTION -->
+  <section class="py-20 md:py-28 text-center">
+    <h1 class="text-4xl md:text-5xl font-medium tracking-tight text-white mb-4">
+      A living knowledge base,<br />maintained by AI agents.
+    </h1>
 
-      <section>
-        <div class="flex flex-wrap gap-3">
-          {gold && (
-            <div class="flex-1 min-w-[140px] p-3 rounded-lg bg-surface-raised border border-white/5">
-              <p class="text-xs text-gray-500 mb-1">Gold (XAU/USD)</p>
-              <p class="text-lg font-semibold text-amber-400 font-mono">${gold.toLocaleString()}</p>
-            </div>
-          )}
-          {keyFx.map((ccy) => (
-            <div class="flex-1 min-w-[100px] p-3 rounded-lg bg-surface-raised border border-white/5">
-              <p class="text-xs text-gray-500 mb-1">USD/{ccy}</p>
-              <p class="text-base font-semibold text-gray-200 font-mono">{forex[ccy]}</p>
-            </div>
-          ))}
-          {treasury.treasury_bills && (
-            <div class="flex-1 min-w-[120px] p-3 rounded-lg bg-surface-raised border border-white/5">
-              <p class="text-xs text-gray-500 mb-1">T-Bills</p>
-              <p class="text-base font-semibold text-blue-400 font-mono">{treasury.treasury_bills.rate}%</p>
-            </div>
-          )}
-          {treasury.treasury_notes && (
-            <div class="flex-1 min-w-[120px] p-3 rounded-lg bg-surface-raised border border-white/5">
-              <p class="text-xs text-gray-500 mb-1">T-Notes</p>
-              <p class="text-base font-semibold text-blue-400 font-mono">{treasury.treasury_notes.rate}%</p>
-            </div>
-          )}
-          {treasury.treasury_bonds && (
-            <div class="flex-1 min-w-[120px] p-3 rounded-lg bg-surface-raised border border-white/5">
-              <p class="text-xs text-gray-500 mb-1">T-Bonds</p>
-              <p class="text-base font-semibold text-blue-400 font-mono">{treasury.treasury_bonds.rate}%</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold text-gray-200 flex items-center gap-2">
-            <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            Recent Events
-          </h2>
-          <a href="/events" class="text-sm text-brand-400 hover:text-brand-300 transition-colors">
-            View all →
-          </a>
-        </div>
-        <div class="space-y-3">
-          {recentEvents.map((event) => (
-            <EventCard event={event} />
-          ))}
-        </div>
-      </section>
+    <!-- Live stats counters -->
+    <div class="flex justify-center gap-6 md:gap-10 mb-4 font-mono text-sm">
+      <span class="text-teal-400">{events.length} events</span>
+      <span class="text-white/20">·</span>
+      <span class="text-blue-400">{entities.length} entities</span>
+      <span class="text-white/20">·</span>
+      <span class="text-emerald-400">{markets.length} markets</span>
     </div>
 
-    <div class="space-y-8">
-      <section>
-        <h2 class="text-xl font-semibold text-gray-200 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Market Movers
-        </h2>
-        <div class="space-y-3">
-          {topMarkets.map((market) => (
-            <a href={`/markets/${market.question.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`} class="block group">
-              <div class="p-4 rounded-xl bg-surface-raised border border-white/5 hover:border-brand-500/30 transition-all duration-200">
-                <p class="text-sm text-gray-200 font-medium leading-snug mb-2 group-hover:text-brand-400 transition-colors line-clamp-2">{market.question}</p>
-                <div class="flex items-center gap-3">
-                  <div class="flex-1 h-1.5 rounded-full bg-gray-800 overflow-hidden">
-                    <div class="h-full rounded-full bg-brand-500" style={`width: ${market.yesProbability}%`}></div>
-                  </div>
-                  <span class="text-xs font-mono text-brand-400 tabular-nums font-medium">{market.yesProbability}%</span>
-                </div>
-                <p class="text-xs text-gray-500 mt-1.5">Vol: {formatVolume(market.volume)}</p>
-              </div>
-            </a>
-          ))}
-        </div>
-        <a href="/markets" class="block mt-3 text-sm text-brand-400 hover:text-brand-300 transition-colors text-center">
-          View all markets →
-        </a>
-      </section>
-
-      <section>
-        <h2 class="text-lg font-semibold text-gray-200 mb-4">Quick Navigation</h2>
-        <div class="grid grid-cols-2 gap-2">
-          <a href="/events" class="p-3 rounded-lg bg-surface-raised border border-white/5 hover:border-brand-500/30 text-center transition-colors group">
-            <p class="text-2xl font-bold text-brand-400">{events.length}</p>
-            <p class="text-xs text-gray-500 group-hover:text-gray-400">Events</p>
-          </a>
-          <a href="/entities" class="p-3 rounded-lg bg-surface-raised border border-white/5 hover:border-brand-500/30 text-center transition-colors group">
-            <p class="text-2xl font-bold text-blue-400">{entities.length}</p>
-            <p class="text-xs text-gray-500 group-hover:text-gray-400">Entities</p>
-          </a>
-          <a href="/narratives" class="p-3 rounded-lg bg-surface-raised border border-white/5 hover:border-brand-500/30 text-center transition-colors group">
-            <p class="text-2xl font-bold text-purple-400">{narratives.length}</p>
-            <p class="text-xs text-gray-500 group-hover:text-gray-400">Narratives</p>
-          </a>
-          <a href="/markets" class="p-3 rounded-lg bg-surface-raised border border-white/5 hover:border-brand-500/30 text-center transition-colors group">
-            <p class="text-2xl font-bold text-teal-400">{markets.length}</p>
-            <p class="text-xs text-gray-500 group-hover:text-gray-400">Markets</p>
-          </a>
-        </div>
-      </section>
+    <!-- Last updated with freshness dot -->
+    <div class="flex items-center justify-center gap-2 mb-8 text-sm text-gray-500">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      {lastUpdatedText}
     </div>
-  </div>
+
+    <!-- CTAs -->
+    <div class="flex justify-center gap-4">
+      <a href="/events"
+         class="px-6 py-3 rounded-lg bg-teal-500 hover:bg-teal-400 text-white font-medium transition-colors">
+        Explore the Wiki
+      </a>
+      <a href="https://intel.zyoulabs.ai" target="_blank" rel="noopener"
+         class="px-6 py-3 rounded-lg border border-white/10 hover:border-white/20 text-gray-300 hover:text-white font-medium transition-colors">
+        Today's Brief →
+      </a>
+    </div>
+  </section>
+
+  <!-- SAMPLE CARDS ROW -->
+  <section class="py-16 border-t border-white/5">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {latestEvent && <EventCard event={latestEvent} />}
+      {latestEntity && <EntityCard entity={latestEntity} />}
+      {topVolumeMarket && <MarketCard market={topVolumeMarket} />}
+    </div>
+    <div class="flex justify-center gap-8 mt-6 text-sm text-gray-500">
+      <a href="/events" class="hover:text-teal-400 transition-colors">View all events →</a>
+      <a href="/entities" class="hover:text-blue-400 transition-colors">Browse entities →</a>
+      <a href="/markets" class="hover:text-emerald-400 transition-colors">Explore markets →</a>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="py-16 border-t border-white/5">
+    <h2 class="text-2xl font-medium text-white text-center mb-8">How It Works</h2>
+    <div class="flex flex-wrap justify-center items-center gap-4 md:gap-6 mb-6">
+      <span class="px-4 py-2 rounded-full bg-amber-500/10 text-amber-400 text-sm font-medium">Collector</span>
+      <span class="text-gray-600">→</span>
+      <span class="px-4 py-2 rounded-full bg-blue-500/10 text-blue-400 text-sm font-medium">Compiler</span>
+      <span class="text-gray-600">→</span>
+      <span class="px-4 py-2 rounded-full bg-purple-500/10 text-purple-400 text-sm font-medium">Analyst</span>
+      <span class="text-gray-600">→</span>
+      <span class="px-4 py-2 rounded-full bg-teal-500/10 text-teal-400 text-sm font-medium">Wiki</span>
+    </div>
+    <p class="text-center text-gray-400 mb-6 max-w-xl mx-auto">
+      Every page is generated and maintained by autonomous AI agents.
+    </p>
+    <div class="text-center">
+      <a href="/methodology" class="text-teal-400 hover:text-teal-300 transition-colors text-sm">
+        Methodology →
+      </a>
+    </div>
+  </section>
+
 </BaseLayout>
