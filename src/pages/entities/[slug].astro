@@ -1,15 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TypeBadge from '../../components/badges/TypeBadge.astro';
-import FooterMeta from '../../components/shared/FooterMeta.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
 import ObjectivesCard from '../../components/cards/ObjectivesCard.astro';
 import TrackRecordSection from '../../components/sections/TrackRecordSection.astro';
 import EntityConnections from '../../components/sections/EntityConnections.astro';
-import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import { loadAllEntities } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
-import { marked } from 'marked';
 
 export function getStaticPaths() {
   const entities = loadAllEntities();
@@ -22,12 +19,20 @@ export function getStaticPaths() {
 const { entity } = Astro.props;
 const xref = buildCrossReferences();
 const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
+// Derive related events (slugs) and markets (slugs) for D3 graph from cross-references
+const relatedEvents = mentioningEvents.map(e => e.slug);
+// Collect unique market slugs from all events that mention this entity
+const relatedMarkets = [...new Set(mentioningEvents.flatMap(e => e.relatedMarkets))];
 ---
 
 <BaseLayout
   title={entity.title}
   description={`${entity.type} — ${entity.affiliations || 'Signal Intelligence entity profile'}`}
   breadcrumbs={[{ label: 'Entities', href: '/entities' }, { label: entity.title }]}
+  footerType="entity"
+  footerUpdatedBy="Analyst"
+  footerUpdatedAt={entity.lastUpdated || undefined}
+  footerSourceCount={mentioningEvents.length}
 >
   <!-- Header Card -->
   <div class="mb-8 p-6 rounded-card bg-surface border border-[var(--border)]">
@@ -65,8 +70,8 @@ const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
   <section class="mb-8">
     <EntityConnections
       entitySlug={entity.slug}
-      relatedEvents={entity.relatedEntities || []}
-      relatedMarkets={entity.relatedMarkets || []}
+      relatedEvents={relatedEvents}
+      relatedMarkets={relatedMarkets}
     />
   </section>
 
@@ -84,6 +89,4 @@ const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
       </div>
     </section>
   )}
-
-  <FooterMeta type="entity" updatedBy="Analyst" updatedAt={entity.lastUpdated || undefined} sourceCount={mentioningEvents.length} />
 </BaseLayout>
