@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import TimelineSection from '../../components/sections/TimelineSection.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
+import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
 import { loadAllNarratives } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
 
@@ -16,6 +17,9 @@ export function getStaticPaths() {
 
 const { narrative } = Astro.props;
 const xref = buildCrossReferences();
+const diffHours = narrative.lastUpdated
+  ? Math.floor((Date.now() - new Date(narrative.lastUpdated).getTime()) / (1000 * 60 * 60))
+  : null;
 ---
 
 <BaseLayout
@@ -28,9 +32,15 @@ const xref = buildCrossReferences();
 >
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 leading-tight mb-3">{narrative.title}</h1>
-    {narrative.firstObserved && (
-      <p class="text-sm text-gray-500">First observed: <span class="font-mono text-gray-400">{narrative.firstObserved}</span></p>
-    )}
+    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+      {narrative.firstObserved && (
+        <span>First observed: <span class="font-mono text-gray-400">{narrative.firstObserved}</span></span>
+      )}
+      <FreshnessBadge lastUpdated={narrative.lastUpdated} />
+      {diffHours !== null && (
+        <span class="font-mono text-gray-400">Updated {diffHours} hours ago</span>
+      )}
+    </div>
   </div>
 
   <div class="space-y-10">

@@ -16,6 +16,13 @@ const allActors = [...new Set(narratives.flatMap((n) => n.pushedBy))].sort();
 
   <div class="flex flex-wrap gap-3 mb-8" id="filters">
     <div class="flex flex-col gap-1">
+      <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Sort by</label>
+      <select data-filter="sort" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
+        <option value="freshness">Freshness (newest first)</option>
+        <option value="name">Name (A-Z)</option>
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
       <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Actor</label>
       <select data-filter="actor" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
         <option value="">All actors</option>
@@ -29,6 +36,8 @@ const allActors = [...new Set(narratives.flatMap((n) => n.pushedBy))].sort();
       <div
         class="narrative-item"
         data-actors={narrative.pushedBy.join(',')}
+        data-updated={narrative.lastUpdated || ''}
+        data-title={narrative.title.toLowerCase()}
       >
         <NarrativeCard narrative={narrative} />
       </div>
@@ -40,13 +49,15 @@ const allActors = [...new Set(narratives.flatMap((n) => n.pushedBy))].sort();
 
 <script>
   const filters = document.querySelectorAll('[data-filter]');
-  const items = document.querySelectorAll('.narrative-item');
+  const list = document.getElementById('narrative-list');
+  const items = Array.from(document.querySelectorAll('.narrative-item'));
   const noResults = document.getElementById('no-results');
 
   function applyFilters() {
     const active: Record<string, string> = {};
     filters.forEach((el) => {
       const select = el as HTMLSelectElement;
+      if (select.dataset.filter === 'sort') return;
       active[select.dataset.filter!] = select.value;
     });
 
@@ -63,7 +74,26 @@ const allActors = [...new Set(narratives.flatMap((n) => n.pushedBy))].sort();
     });
 
     if (noResults) noResults.classList.toggle('hidden', visible > 0);
+    applySort();
+  }
+
+  function applySort() {
+    const sortSelect = document.querySelector('[data-filter="sort"]') as HTMLSelectElement;
+    const sortBy = sortSelect?.value || 'freshness';
+    const sorted = [...items].sort((a, b) => {
+      const elA = a as HTMLElement;
+      const elB = b as HTMLElement;
+      if (sortBy === 'name') {
+        return (elA.dataset.title || '').localeCompare(elB.dataset.title || '');
+      }
+      // freshness: newest first (descending)
+      const updA = elA.dataset.updated || '';
+      const updB = elB.dataset.updated || '';
+      return updB.localeCompare(updA);
+    });
+    sorted.forEach((el) => list?.appendChild(el));
   }
 
   filters.forEach((el) => el.addEventListener('change', applyFilters));
+  applySort();
 </script>

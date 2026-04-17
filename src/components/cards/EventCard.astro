@@ -1,6 +1,7 @@
 ---
 import type { WikiEvent } from '../../data/types';
 import StatusBadge from '../badges/StatusBadge.astro';
+import FreshnessBadge from '../badges/FreshnessBadge.astro';
 
 interface Props {
   event: WikiEvent;
@@ -32,9 +33,7 @@ const latestTimeline = event.timeline.length > 0
       {latestTimeline && (
         <p class="text-sm text-gray-400 line-clamp-2 flex-1">{latestTimeline.replace(/^\d{4}-\d{2}-\d{2}\s*/, '')}</p>
       )}
-      {event.lastUpdated && (
-        <span class="text-xs text-gray-600 font-mono ml-2 shrink-0">{event.lastUpdated}</span>
-      )}
+      <FreshnessBadge lastUpdated={event.lastUpdated} />
     </div>
   </article>
 </a>

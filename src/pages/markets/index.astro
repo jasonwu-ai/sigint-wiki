@@ -21,6 +21,7 @@ const sortedByVolume = [...markets].sort((a, b) => {
       <label class="text-xs text-gray-500 uppercase tracking-wider font-medium">Sort by</label>
       <select data-filter="sort" class="bg-surface-raised border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-brand-500">
         <option value="volume">Volume (high → low)</option>
+        <option value="freshness">Freshness (newest first)</option>
         <option value="probability-asc">Probability (low → high)</option>
         <option value="probability-desc">Probability (high → low)</option>
       </select>
@@ -41,6 +42,7 @@ const sortedByVolume = [...markets].sort((a, b) => {
         data-volume={market.volumeRaw}
         data-probability={market.currentProbability.yes}
         data-expired={market.expired ? '1' : '0'}
+        data-updated={market.lastUpdated || ''}
       >
         <MarketCard market={market} />
       </div>
@@ -77,6 +79,10 @@ const sortedByVolume = [...markets].sort((a, b) => {
       if (expA !== expB) return expA - expB;
       if (sortBy === 'volume') {
         return parseFloat(elB.dataset.volume || '0') - parseFloat(elA.dataset.volume || '0');
+      } else if (sortBy === 'freshness') {
+        const updA = elA.dataset.updated || '';
+        const updB = elB.dataset.updated || '';
+        return updB.localeCompare(updA);
       } else if (sortBy === 'probability-asc') {
         return parseFloat(elA.dataset.probability || '0') - parseFloat(elB.dataset.probability || '0');
       } else {

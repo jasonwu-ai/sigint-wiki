@@ -1,6 +1,7 @@
 ---
 import type { WikiMarket } from '../../data/types';
 import { formatVolume } from '../../data/svg-chart';
+import FreshnessBadge from '../badges/FreshnessBadge.astro';
 
 interface Props {
   market: WikiMarket;
@@ -25,7 +26,7 @@ const noPercent = market.currentProbability.no;
     </div>
     <div class="flex items-center justify-between text-xs text-gray-500">
       <span>Vol: {formatVolume(market.volumeRaw)}</span>
-      <span class="text-gray-600">{market.history.length} data points</span>
+      <FreshnessBadge lastUpdated={market.lastUpdated} showLabel={false} />
     </div>
   </article>
 </a>

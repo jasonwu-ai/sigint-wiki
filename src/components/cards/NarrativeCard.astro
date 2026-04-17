@@ -1,5 +1,6 @@
 ---
 import type { WikiNarrative } from '../../data/types';
+import FreshnessBadge from '../badges/FreshnessBadge.astro';
 
 interface Props {
   narrative: WikiNarrative;
@@ -31,5 +32,6 @@ const previewText = narrative.summary
         })}
       </div>
     )}
+    <div class="mt-2"><FreshnessBadge lastUpdated={narrative.lastUpdated} showLabel={false} /></div>
   </article>
 </a>

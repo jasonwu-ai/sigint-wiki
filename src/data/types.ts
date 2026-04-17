@@ -35,6 +35,7 @@ export interface WikiMarket {
   relatedEvents: string[];
   endDate: string | null;
   expired: boolean;
+  lastUpdated: string | null;
 }
 
 export interface WikiNarrative {
@@ -46,6 +47,7 @@ export interface WikiNarrative {
   evolution: string[];
   counterNarratives: string[];
   relatedEvents: string[];
+  lastUpdated: string | null;
 }
 
 export interface IntelligenceBrief {

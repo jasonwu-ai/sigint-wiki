@@ -156,6 +156,7 @@ export function loadAllMarkets(): WikiMarket[] {
       relatedEvents: cleanBulletList(parseBulletList(sections, 'related events')),
       endDate: endDate ? endDate.toISOString() : null,
       expired: endDate !== null && endDate < now,
+      lastUpdated: extractLatestDateFromRaw(raw),
     };
   });
 }
@@ -198,6 +199,7 @@ export function loadAllNarratives(): WikiNarrative[] {
       evolution: parseBulletList(sections, 'evolution'),
       counterNarratives: parseBulletList(sections, 'counter-narratives'),
       relatedEvents: cleanBulletList(parseBulletList(sections, 'related events')),
+      lastUpdated: extractLatestDateFromRaw(raw),
     };
   });
 }

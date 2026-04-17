@@ -24,6 +24,9 @@ const xref = buildCrossReferences();
 const historySvg = generateProbabilityChart(market.history);
 
 const isAwaitingEnrichment = market.context?.toLowerCase().includes('awaiting') || false;
+const diffHours = market.lastUpdated
+  ? Math.floor((Date.now() - new Date(market.lastUpdated).getTime()) / (1000 * 60 * 60))
+  : null;
 
 const relatedEntitySlugs = [...new Set(
   market.relatedEvents.flatMap(eventSlug => {
@@ -50,7 +53,10 @@ const relatedEntities = relatedEntitySlugs
       {market.title}
     </h1>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)] font-mono">
-      <FreshnessBadge lastUpdated={market.history.length > 0 ? market.history[market.history.length - 1].timestamp.slice(0, 10) : null} />
+      <FreshnessBadge lastUpdated={market.lastUpdated} />
+      {diffHours !== null && (
+        <span>Updated {diffHours} hours ago</span>
+      )}
       <span>·</span>
       <span>{market.volume} volume</span>
     </div>
