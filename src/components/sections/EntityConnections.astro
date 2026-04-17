@@ -1,0 +1,21 @@
+---
+interface Props {
+  entitySlug: string;
+  relatedEvents: string[];
+  relatedMarkets: string[];
+}
+const { entitySlug, relatedEvents, relatedMarkets } = Astro.props;
+---
+
+<section>
+  <h2 class="text-lg font-medium text-[var(--text-primary)] mb-4">Connections</h2>
+  <div
+    id="entity-graph"
+    data-entity={entitySlug}
+    data-events={JSON.stringify(relatedEvents)}
+    data-markets={JSON.stringify(relatedMarkets)}
+    class="h-64 rounded-card bg-surface border border-[var(--border)] flex items-center justify-center"
+  >
+    <p class="text-sm text-[var(--text-faint)]">Relationship graph loading...</p>
+  </div>
+</section>

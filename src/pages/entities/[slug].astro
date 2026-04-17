@@ -1,11 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TypeBadge from '../../components/badges/TypeBadge.astro';
+import FooterMeta from '../../components/shared/FooterMeta.astro';
+import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
+import ObjectivesCard from '../../components/cards/ObjectivesCard.astro';
+import TrackRecordSection from '../../components/sections/TrackRecordSection.astro';
+import EntityConnections from '../../components/sections/EntityConnections.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
-import EmptyState from '../../components/shared/EmptyState.astro';
-import { loadAllEntities, loadAllEvents } from '../../data/loader';
+import { loadAllEntities } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
-import type { CrossReferences } from '../../data/resolvers';
 import { marked } from 'marked';
 
 export function getStaticPaths() {
@@ -19,90 +22,68 @@ export function getStaticPaths() {
 const { entity } = Astro.props;
 const xref = buildCrossReferences();
 const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
-
-const hasAnyContent = entity.objectives || entity.claimsAndTrackRecord || entity.divergences || entity.connections;
 ---
 
 <BaseLayout
   title={entity.title}
   description={`${entity.type} — ${entity.affiliations || 'Signal Intelligence entity profile'}`}
-  breadcrumbs={[
-    { label: 'Entities', href: '/entities' },
-    { label: entity.title },
-  ]}
-  footerType="entity"
-  footerUpdatedBy="Collector"
-  footerUpdatedAt={new Date().toISOString().slice(0, 10)}
-  footerSourceCount={mentioningEvents.length}
+  breadcrumbs={[{ label: 'Entities', href: '/entities' }, { label: entity.title }]}
 >
-  <div class="mb-8">
-    <div class="flex flex-wrap items-start gap-3 mb-3">
-      <h1 class="text-3xl font-bold text-gray-100 leading-tight">{entity.title}</h1>
+  <!-- Header Card -->
+  <div class="mb-8 p-6 rounded-card bg-surface border border-[var(--border)]">
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <h1 class="text-3xl font-medium text-[var(--text-primary)]" style="letter-spacing: -0.704px">
+        {entity.title}
+      </h1>
       <TypeBadge type={entity.type} />
     </div>
-    {entity.affiliations && (
-      <p class="text-gray-400">{entity.affiliations}</p>
-    )}
-  </div>
-
-  <div class="space-y-8">
-    {hasAnyContent ? (
-      <>
-        {entity.objectives && (
-          <section>
-            <h2 class="text-lg font-semibold text-gray-200 mb-3">Objectives</h2>
-            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
-              <div set:html={marked.parse(entity.objectives || '')} />
-            </div>
-          </section>
-        )}
-
-        {entity.claimsAndTrackRecord && (
-          <section>
-            <h2 class="text-lg font-semibold text-gray-200 mb-3">Claims & Track Record</h2>
-            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
-              <div set:html={marked.parse(entity.claimsAndTrackRecord || '')} />
-            </div>
-          </section>
-        )}
-
-        {entity.divergences && (
-          <section>
-            <h2 class="text-lg font-semibold text-gray-200 mb-3">Divergences</h2>
-            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
-              <div set:html={marked.parse(entity.divergences || '')} />
-            </div>
-          </section>
-        )}
-
-        {entity.connections && (
-          <section>
-            <h2 class="text-lg font-semibold text-gray-200 mb-3">Connections</h2>
-            <div class="p-5 rounded-xl bg-surface-raised border border-white/5 text-sm text-gray-300 leading-relaxed">
-              <div set:html={marked.parse(entity.connections || '')} />
-            </div>
-          </section>
-        )}
-      </>
-    ) : (
-      <EmptyState message="Profile data not yet available for this entity." />
-    )}
-
-    <section>
-      <h2 class="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
-        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        Mentioned in Events
-      </h2>
-      {mentioningEvents.length > 0 ? (
-        <RelatedEvents
-          slugs={mentioningEvents.map((e) => e.slug)}
-          xref={xref}
-          emptyMessage="Not yet mentioned in any tracked events"
-        />
-      ) : (
-        <EmptyState message="Not yet mentioned in any tracked events" />
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      {entity.affiliations && (
+        <span class="text-sm text-[var(--text-muted)]">{entity.affiliations}</span>
       )}
-    </section>
+    </div>
+    <div class="flex items-center gap-4 text-xs text-[var(--text-faint)]">
+      <FreshnessBadge lastUpdated={entity.lastUpdated} />
+      <span>·</span>
+      <span class="font-mono">{mentioningEvents.length} events referencing</span>
+    </div>
   </div>
 
+  <!-- Objectives -->
+  <section class="mb-8">
+    <ObjectivesCard stated={entity.objectives} inferred={null} />
+  </section>
+
+  <!-- Track Record -->
+  {entity.claimsAndTrackRecord && (
+    <section class="mb-8">
+      <TrackRecordSection claims={entity.claimsAndTrackRecord} />
+    </section>
+  )}
+
+  <!-- Connections (D3 graph placeholder) -->
+  <section class="mb-8">
+    <EntityConnections
+      entitySlug={entity.slug}
+      relatedEvents={entity.relatedEntities || []}
+      relatedMarkets={entity.relatedMarkets || []}
+    />
+  </section>
+
+  <!-- Related Events -->
+  {mentioningEvents.length > 0 && (
+    <section class="mb-8">
+      <h2 class="text-lg font-medium text-[var(--text-primary)] mb-4">Mentioned in Events</h2>
+      <div class="grid gap-3">
+        {mentioningEvents.slice(0, 4).map(event => (
+          <a href={`/events/${event.slug}`} class="block p-4 rounded-card bg-surface border border-[var(--border)] hover:border-accent/30 transition-colors">
+            <p class="text-sm font-medium text-[var(--text-primary)]">{event.title}</p>
+            <p class="text-xs text-[var(--text-faint)] font-mono mt-1">{event.theatre}</p>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <FooterMeta type="entity" updatedBy="Analyst" updatedAt={entity.lastUpdated || undefined} sourceCount={mentioningEvents.length} />
 </BaseLayout>

@@ -1,0 +1,31 @@
+---
+interface Props {
+  claims: string | null;
+}
+const { claims } = Astro.props;
+const entries = claims
+  ? claims.split('\n').filter(l => l.trim().startsWith('-'))
+  : [];
+---
+
+<section>
+  <h2 class="text-lg font-medium text-[var(--text-primary)] mb-4">Track Record</h2>
+  <div class="space-y-3">
+    {entries.map((entry, i) => {
+      const dateMatch = entry.match(/^(\d{4}-\d{2})/);
+      const date = dateMatch ? dateMatch[1] : null;
+      const text = entry.replace(/^-\s*(?:\d{4}-\d{2}\s*[\|—]\s*)?/, '');
+      const isAligned = text.toLowerCase().includes('aligned');
+      const isDiverged = text.toLowerCase().includes('diverge');
+      return (
+        <div class="flex items-start gap-3">
+          <div class={`shrink-0 w-2 h-2 rounded-full mt-1.5 ${isDiverged ? 'bg-recent' : isAligned ? 'bg-fresh' : 'bg-stale'}`}></div>
+          <div class="flex-1">
+            {date && <span class="text-xs font-mono text-[var(--text-faint)] mr-2">{date}</span>}
+            <span class="text-sm text-[var(--text-body)]">{text}</span>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>
