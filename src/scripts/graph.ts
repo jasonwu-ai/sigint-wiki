@@ -65,6 +65,28 @@ export function initRelationshipGraph(containerId: string) {
     .attr('cursor', 'pointer')
     .call(drag(simulation) as any);
 
+  node
+    .attr('tabindex', '0')
+    .attr('role', 'button')
+    .on('keydown', (event: KeyboardEvent, d: any) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (d.slug) window.location.href = d.slug;
+      }
+      const nodeArr = nodes as GraphNode[];
+      const idx = nodeArr.findIndex(n => n.id === d.id);
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        const next = nodeArr[(idx + 1) % nodeArr.length];
+        (d3.select(`#${containerId}`).selectAll('g') as any).nodes()[nodeArr.indexOf(next)]?.focus();
+      }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const prev = nodeArr[(idx - 1 + nodeArr.length) % nodeArr.length];
+        (d3.select(`#${containerId}`).selectAll('g') as any).nodes()[nodeArr.indexOf(prev)]?.focus();
+      }
+    });
+
   node.append('circle')
     .attr('r', 8)
     .attr('fill', (d: any) => colorMap[d.type] || '#888');
@@ -91,6 +113,17 @@ export function initRelationshipGraph(containerId: string) {
       .attr('y2', (d: any) => d.target.y);
 
     node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+  });
+
+  window.addEventListener('resize', () => {
+    const newWidth = container.clientWidth || 600;
+    const newHeight = container.clientHeight || 256;
+    d3.select(`#${containerId}`).select('svg')
+      .attr('width', newWidth)
+      .attr('height', newHeight)
+      .attr('viewBox', [0, 0, newWidth, newHeight]);
+    simulation.force('center', d3.forceCenter(newWidth / 2, newHeight / 2));
+    simulation.alpha(0.3).restart();
   });
 }
 
