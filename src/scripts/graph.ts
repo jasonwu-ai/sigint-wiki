@@ -78,12 +78,12 @@ export function initRelationshipGraph(containerId: string) {
       if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
         event.preventDefault();
         const next = nodeArr[(idx + 1) % nodeArr.length];
-        (d3.select(`#${containerId}`).selectAll('g') as any).nodes()[nodeArr.indexOf(next)]?.focus();
+        (node.nodes() as any)[nodeArr.indexOf(next)]?.focus();
       }
       if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
         event.preventDefault();
         const prev = nodeArr[(idx - 1 + nodeArr.length) % nodeArr.length];
-        (d3.select(`#${containerId}`).selectAll('g') as any).nodes()[nodeArr.indexOf(prev)]?.focus();
+        (node.nodes() as any)[nodeArr.indexOf(prev)]?.focus();
       }
     });
 
