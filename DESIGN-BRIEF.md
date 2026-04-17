@@ -144,7 +144,7 @@ Key design elements:
 - **Hero**: Tight, compressed headline at 48px Inter 510 with negative tracking. Not big and shouty — precise and confident.
 - **Live stats**: Monospace counter with teal accent dots. Feels like a terminal readout.
 - **Sample cards**: 3 cards showing the depth of each content type. Freshness indicators visible.
-- **"Today's Brief →"**: Links to intel.zyoulabs.ai. Subtle but present.
+- **"Browse Events →"**: Links to /events. Subtle but present.
 - **How it works**: Brief methodology section. Shows the AI pipeline as a feature.
 
 ### 2. Entity Detail Page
@@ -269,27 +269,7 @@ Interactions:
   - Graph animates in on page load
 ```
 
----
 
-## intel.zyoulabs.ai Direction
-
-Separate visual identity — same dark base but different accent:
-
-```
-Accent: Warm amber (#f59e0b) instead of teal
-Fonts: Same Inter system
-Vibe: "Your daily intelligence briefing" — more report-like, less wiki-like
-Structure:
-  - Today's brief (hero)
-  - Market signals dashboard
-  - Narrative divergence alerts
-  - Scenario spotlight
-  - Links back to wiki for deep dives
-```
-
-This is Phase 2+ — scaffold the domain now, design later.
-
----
 
 ## Implementation Notes
 
