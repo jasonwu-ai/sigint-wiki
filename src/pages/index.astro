@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import EventCard from '../components/cards/EventCard.astro';
 import EntityCard from '../components/cards/EntityCard.astro';
 import MarketCard from '../components/cards/MarketCard.astro';
+import AIAuthoredBadge from '../components/badges/AIAuthoredBadge.astro';
 import { loadAllEvents, loadAllEntities, loadAllMarkets, loadLatestBrief } from '../data/loader';
 
 const events = loadAllEvents();
@@ -58,6 +59,7 @@ const lastUpdatedText = brief
       <span class="text-blue-400">{entities.length} entities</span>
       <span class="text-white/20">·</span>
       <span class="text-emerald-400">{markets.length} markets</span>
+      <span class="ml-2"><AIAuthoredBadge /></span>
     </div>
 
     <!-- Last updated with freshness dot -->

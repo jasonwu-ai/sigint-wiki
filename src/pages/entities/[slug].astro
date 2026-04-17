@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TypeBadge from '../../components/badges/TypeBadge.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import ObjectivesCard from '../../components/cards/ObjectivesCard.astro';
 import TrackRecordSection from '../../components/sections/TrackRecordSection.astro';
 import EntityConnections from '../../components/sections/EntityConnections.astro';
@@ -44,6 +45,7 @@ const relatedMarkets = [...new Set(mentioningEvents.flatMap(e => e.relatedMarket
         {entity.title}
       </h1>
       <TypeBadge type={entity.type} />
+      <AIAuthoredBadge />
     </div>
     <div class="flex flex-wrap items-center gap-3 mb-4">
       {entity.affiliations && (

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import FooterMeta from '../components/shared/FooterMeta.astro';
 ---
 
 <BaseLayout title="Methodology" description="How Signal Intelligence collects, processes, and analyses geopolitical intelligence">
@@ -59,4 +60,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </section>
     </div>
   </div>
+
+  <FooterMeta
+    updatedBy="Collector"
+    updatedAt={new Date().toISOString().slice(0, 10)}
+    sourceCount={0}
+    type="page"
+  />
 </BaseLayout>

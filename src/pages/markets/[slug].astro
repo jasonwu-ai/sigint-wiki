@@ -5,6 +5,7 @@ import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
 import FooterMeta from '../../components/shared/FooterMeta.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
 import type { WikiEntity } from '../../data/types';
 import { loadAllMarkets } from '../../data/loader';
@@ -94,6 +95,10 @@ const relatedEntities = relatedEntitySlugs
     <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
       <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
       <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
+    </div>
+
+    <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
+      <AIAuthoredBadge />
     </div>
 
     <!-- Data Points -->

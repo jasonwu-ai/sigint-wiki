@@ -15,7 +15,7 @@ const {
 
 const agentLabel = updatedBy || 'Collector';
 const dateLabel = updatedAt || new Date().toISOString().slice(0, 10);
-const sourceLabel = sourceCount ? ` · ${sourceCount} source events` : '';
+const sourceLabel = sourceCount ? ` from ${sourceCount} source events` : '';
 ---
 
 <footer class="border-t border-[var(--border-subtle)] mt-16 py-8">

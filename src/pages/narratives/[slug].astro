@@ -4,6 +4,8 @@ import TimelineSection from '../../components/sections/TimelineSection.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
+import FooterMeta from '../../components/shared/FooterMeta.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllNarratives } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
 
@@ -40,6 +42,9 @@ const diffHours = narrative.lastUpdated
       {diffHours !== null && (
         <span class="font-mono text-gray-400">Updated {diffHours} hours ago</span>
       )}
+    </div>
+    <div class="mt-3">
+      <AIAuthoredBadge />
     </div>
   </div>
 
@@ -121,4 +126,11 @@ const diffHours = narrative.lastUpdated
       <RelatedEvents slugs={narrative.relatedEvents} xref={xref} emptyMessage="No related events linked yet" />
     </section>
   </div>
+
+  <FooterMeta
+    updatedBy="Analyst"
+    updatedAt={narrative.lastUpdated}
+    sourceCount={narrative.relatedEvents.length}
+    type="narrative"
+  />
 </BaseLayout>

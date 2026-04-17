@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import StatusBadge from '../../components/badges/StatusBadge.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
 import FooterMeta from '../../components/shared/FooterMeta.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import TimelineSection from '../../components/sections/TimelineSection.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
 import MarketCard from '../../components/cards/MarketCard.astro';
@@ -47,6 +48,7 @@ const relatedMarketObjects = event.relatedMarkets
     <div class="flex flex-wrap items-start gap-3 mb-4">
       <h1 class="text-3xl font-bold text-gray-100 leading-tight">{event.title}</h1>
       <StatusBadge status={event.status} />
+      <AIAuthoredBadge />
       <FreshnessBadge lastUpdated={event.lastUpdated} />
       {diffHours !== null && (
         <span class="text-sm font-mono text-gray-400">Updated {diffHours} hours ago</span>
