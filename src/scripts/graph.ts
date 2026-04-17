@@ -21,7 +21,7 @@ export function initRelationshipGraph(containerId: string) {
   const markets: string[] = JSON.parse(container.dataset.markets || '[]');
 
   const nodes: GraphNode[] = [
-    { id: entity, label: entity, type: 'entity', slug: entity },
+    { id: entity, label: entity, type: 'entity', slug: `/entities/${entity}` },
     ...events.map(s => ({ id: s, label: s, type: 'event' as const, slug: `/events/${s}` })),
     ...markets.map(s => ({ id: s, label: s, type: 'market' as const, slug: `/markets/${s}` })),
   ];
