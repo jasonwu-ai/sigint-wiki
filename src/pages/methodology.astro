@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import FooterMeta from '../components/shared/FooterMeta.astro';
+
 import AIAuthoredBadge from '../components/badges/AIAuthoredBadge.astro';
 ---
 
@@ -63,10 +63,4 @@ import AIAuthoredBadge from '../components/badges/AIAuthoredBadge.astro';
     </div>
   </div>
 
-  <FooterMeta
-    updatedBy="Collector"
-    updatedAt={new Date().toISOString().slice(0, 10)}
-    sourceCount={0}
-    type="page"
-  />
 </BaseLayout>
