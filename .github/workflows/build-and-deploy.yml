@@ -2,7 +2,7 @@ name: Build and Deploy Wiki
 
 on:
   push:
-    branches: [main]
+    branches: [slice-7]
   workflow_dispatch:
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
         uses: burnett01/rsync-deployments@7.0.0
         with:
           switches: -avz --delete
-          remote_path: /home/paperclip/signal-intelligence/site/dist/
+          remote_path: /home/hermes/sigint-wiki/dist/
           remote_host: ${{ secrets.VPS_HOST }}
-          remote_user: paperclip
+          remote_user: hermes
           remote_key: ${{ secrets.VPS_SSH_KEY }}

@@ -23,6 +23,7 @@ import type {
   DailyBrief,
 } from './types';
 
+// SigInt pipeline writes data to /home/paperclip/signal-intelligence/
 const DATA_ROOT = process.env.WIKI_DATA_ROOT || '/home/paperclip/signal-intelligence';
 
 function readDir(dir: string): string[] {

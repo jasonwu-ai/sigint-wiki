@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Data source - SigInt pipeline writes to /home/paperclip/signal-intelligence/
 WIKI_DATA_ROOT="${WIKI_DATA_ROOT:-/home/paperclip/signal-intelligence}"
 SITE_DIR="$(dirname "$0")/.."
 
