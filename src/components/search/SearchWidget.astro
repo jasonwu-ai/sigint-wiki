@@ -1,0 +1,64 @@
+---
+// SearchWidget.astro
+---
+
+<div id="search" class="search-container"></div>
+
+<style is:global>
+  /* Pagefind UI dark theme overrides */
+  .pagefind-ui {
+    --pagefind-ui-scale: 0.9;
+    --pagefind-ui-primary: #a78bfa;
+    --pagefind-ui-text: #e2e8f0;
+    --pagefind-ui-background: #1e1b2e;
+    --pagefind-ui-border: #3f3f5a;
+    --pagefind-ui-tag: #2d2a3d;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-image-border-radius: 8px;
+    --pagefind-ui-font: 'Inter', system-ui, sans-serif;
+  }
+
+  .search-container {
+    padding: 1rem;
+  }
+
+  /* Result styling */
+  .pagefind-ui__result {
+    border-bottom: 1px solid #3f3f5a !important;
+    padding: 1rem 0 !important;
+  }
+
+  .pagefind-ui__result-title {
+    color: #a78bfa !important;
+    font-weight: 600 !important;
+  }
+
+  .pagefind-ui__result-excerpt {
+    color: #94a3b8 !important;
+  }
+</style>
+
+<script>
+  // Lazy load Pagefind only when user interacts
+  let pagefindLoaded = false;
+
+  async function loadPagefind() {
+    if (pagefindLoaded) return;
+    pagefindLoaded = true;
+
+    const searchContainer = document.getElementById('search');
+    if (!searchContainer) return;
+
+    // @ts-ignore
+    const pagefind = await import('/pagefind/pagefind.js');
+    await pagefind.init();
+
+    // Pagefind UI will auto-initialize in the #search div
+    // If it doesn't, manually instantiate:
+    new pagefind.ui({ element: '#search', showSubResults: true });
+  }
+
+  // Expose for external trigger
+  (window as any).openSearch = loadPagefind;
+</script>

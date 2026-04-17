@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "npx pagefind --site dist --glob '**/*.html'",
     "preview": "astro preview"
   },
   "dependencies": {
@@ -12,6 +13,7 @@
     "astro": "^5.7.4",
     "d3": "^7.9.0",
     "marked": "^15.0.8",
+    "pagefind": "^1.5.2",
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {

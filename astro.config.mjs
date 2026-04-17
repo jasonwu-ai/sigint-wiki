@@ -8,5 +8,10 @@ export default defineConfig({
     define: {
       'import.meta.env.BUILT_AT': JSON.stringify(process.env.BUILT_AT || 'unknown'),
     },
+    build: {
+      rollupOptions: {
+        external: ['/pagefind/pagefind.js'],
+      },
+    },
   },
 });
