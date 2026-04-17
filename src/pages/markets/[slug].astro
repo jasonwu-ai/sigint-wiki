@@ -54,9 +54,12 @@ const relatedEntities = relatedEntitySlugs
   footerSourceCount={relatedEntities.length + market.relatedEvents.length}
 >
   <div class="mb-8 p-6 rounded-card bg-surface border border-[var(--border)]">
-    <h1 class="text-3xl font-medium text-[var(--text-primary)] leading-tight mb-4" style="letter-spacing: -0.704px">
-      {market.title}
-    </h1>
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <h1 class="text-3xl font-medium text-[var(--text-primary)] leading-tight" style="letter-spacing: -0.704px">
+        {market.title}
+      </h1>
+      <AIAuthoredBadge />
+    </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)] font-mono">
       <FreshnessBadge lastUpdated={market.lastUpdated} />
       {diffHours !== null && (
@@ -99,10 +102,6 @@ const relatedEntities = relatedEntitySlugs
     <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
       <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
       <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
-    </div>
-
-    <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
-      <AIAuthoredBadge />
     </div>
 
     <!-- Data Points -->
