@@ -44,7 +44,14 @@ const lastUpdatedText = brief
   : 'Data refreshing shortly';
 ---
 
-<BaseLayout title="Signal Intelligence Wiki" description="Real-time geopolitical event tracking, prediction market analysis, and narrative intelligence">
+<BaseLayout
+  title="Signal Intelligence Wiki"
+  description="Real-time geopolitical event tracking, prediction market analysis, and narrative intelligence"
+  footerType="page"
+  footerUpdatedBy="Compiler"
+  footerUpdatedAt={brief?.date || null}
+  footerSourceCount={events.length + entities.length + markets.length}
+>
 
   <!-- HERO SECTION -->
   <section class="py-20 md:py-28 text-center">

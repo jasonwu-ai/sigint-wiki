@@ -68,7 +68,12 @@ const scenarioSubs = dailyBrief ? parseSubsections(dailyBrief.scenarioSpotlight)
 const hasScenarioSubsections = scenarioSubs.length > 1;
 ---
 
-<BaseLayout title={pageTitle} description={`Intelligence analysis for ${resolvedDate}`} breadcrumbs={[{ label: 'Briefs', href: '/briefs/latest' }, { label: resolvedDate }]}>
+<BaseLayout title={pageTitle} description={`Intelligence analysis for ${resolvedDate}`} breadcrumbs={[{ label: 'Briefs', href: '/briefs/latest' }, { label: resolvedDate }]}
+  footerType="brief"
+  footerUpdatedBy="Compiler"
+  footerUpdatedAt={resolvedDate !== 'latest' ? resolvedDate : null}
+  footerSourceCount={collectorBriefs.length}
+>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 mb-2">Daily Intelligence Brief</h1>
     <div class="flex items-center gap-3 text-gray-400">
