@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/cards/EventCard.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllEvents } from '../../data/loader';
 
 const events = loadAllEvents();
@@ -10,9 +11,10 @@ const theatres = [...new Set(events.map((e) => e.theatre))].filter(Boolean).sort
 const allThemes = [...new Set(events.flatMap((e) => e.themes))].sort();
 ---
 
-<BaseLayout title="Events" description="Geopolitical events tracked and analysed by Signal Intelligence">
+<BaseLayout title="Events" description="Geopolitical events tracked and analysed by Signal Intelligence" footerType="page" footerUpdatedBy="Collector" footerUpdatedAt={events[0]?.lastUpdated || undefined} footerSourceCount={events.length}>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 mb-2">Events</h1>
+    <AIAuthoredBadge />
     <p class="text-gray-400">Active geopolitical situations monitored across global theatres.</p>
   </div>
 

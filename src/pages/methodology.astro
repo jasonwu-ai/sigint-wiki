@@ -1,11 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FooterMeta from '../components/shared/FooterMeta.astro';
+import AIAuthoredBadge from '../components/badges/AIAuthoredBadge.astro';
 ---
 
-<BaseLayout title="Methodology" description="How Signal Intelligence collects, processes, and analyses geopolitical intelligence">
+<BaseLayout title="Methodology" description="How Signal Intelligence collects, processes, and analyses geopolitical intelligence" footerType="page" footerUpdatedBy="System">
   <div class="max-w-3xl">
     <h1 class="text-3xl font-bold text-gray-100 mb-6">Methodology</h1>
+    <AIAuthoredBadge />
 
     <div class="space-y-8 text-gray-300 leading-relaxed">
       <section>
