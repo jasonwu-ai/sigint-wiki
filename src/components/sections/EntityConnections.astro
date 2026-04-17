@@ -14,8 +14,18 @@ const { entitySlug, relatedEvents, relatedMarkets } = Astro.props;
     data-entity={entitySlug}
     data-events={JSON.stringify(relatedEvents)}
     data-markets={JSON.stringify(relatedMarkets)}
-    class="h-64 rounded-card bg-surface border border-[var(--border)] flex items-center justify-center"
+    class="h-64 rounded-card bg-surface border border-[var(--border)]"
   >
-    <p class="text-sm text-[var(--text-faint)]">Relationship graph loading...</p>
+    <!-- D3 renders here -->
   </div>
 </section>
+
+<script>
+  import { initRelationshipGraph } from '../../scripts/graph';
+  // Lazy load after page is interactive
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => initRelationshipGraph('entity-graph'));
+  } else {
+    initRelationshipGraph('entity-graph');
+  }
+</script>
