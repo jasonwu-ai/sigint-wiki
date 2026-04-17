@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MarketCard from '../../components/cards/MarketCard.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllMarkets } from '../../data/loader';
 
 const markets = loadAllMarkets();
@@ -10,9 +11,10 @@ const sortedByVolume = [...markets].sort((a, b) => {
 });
 ---
 
-<BaseLayout title="Markets" description="Geopolitical prediction markets tracked by Signal Intelligence — probability analysis and trend data">
+<BaseLayout title="Markets" description="Geopolitical prediction markets tracked by Signal Intelligence — probability analysis and trend data" footerType="page" footerUpdatedBy="Collector" footerSourceCount={markets.length}>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 mb-2">Markets</h1>
+    <AIAuthoredBadge />
     <p class="text-gray-400">Geopolitical prediction markets with probability tracking and trend data.</p>
   </div>
 

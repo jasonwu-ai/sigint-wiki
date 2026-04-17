@@ -4,7 +4,7 @@ import TimelineSection from '../../components/sections/TimelineSection.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
-import FooterMeta from '../../components/shared/FooterMeta.astro';
+
 import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllNarratives } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
@@ -31,6 +31,10 @@ const diffHours = narrative.lastUpdated
     { label: 'Narratives', href: '/narratives' },
     { label: narrative.title },
   ]}
+  footerType="narrative"
+  footerUpdatedBy="Analyst"
+  footerUpdatedAt={narrative.lastUpdated}
+  footerSourceCount={narrative.relatedEvents.length}
 >
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 leading-tight mb-3">{narrative.title}</h1>
@@ -127,10 +131,4 @@ const diffHours = narrative.lastUpdated
     </section>
   </div>
 
-  <FooterMeta
-    updatedBy="Analyst"
-    updatedAt={narrative.lastUpdated}
-    sourceCount={narrative.relatedEvents.length}
-    type="narrative"
-  />
 </BaseLayout>

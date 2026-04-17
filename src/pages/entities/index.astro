@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
+import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllEntities } from '../../data/loader';
 
 const entities = loadAllEntities();
@@ -8,9 +9,10 @@ const entities = loadAllEntities();
 const types = [...new Set(entities.map((e) => e.type))].filter(Boolean).sort();
 ---
 
-<BaseLayout title="Entities" description="Geopolitical actors — countries, leaders, institutions, and organisations tracked by Signal Intelligence">
+<BaseLayout title="Entities" description="Geopolitical actors — countries, leaders, institutions, and organisations tracked by Signal Intelligence" footerType="page" footerUpdatedBy="Collector" footerSourceCount={entities.length}>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-100 mb-2">Entities</h1>
+    <AIAuthoredBadge />
     <p class="text-gray-400">Geopolitical actors — countries, leaders, institutions, media outlets, and armed groups.</p>
   </div>
 
