@@ -4,7 +4,6 @@ import ProbabilityChart from '../../components/sections/ProbabilityChart.astro';
 import RelatedEvents from '../../components/cross-links/RelatedEvents.astro';
 import EmptyState from '../../components/shared/EmptyState.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
-import FooterMeta from '../../components/shared/FooterMeta.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
 import type { WikiEntity } from '../../data/types';
 import { loadAllMarkets } from '../../data/loader';
@@ -44,6 +43,8 @@ const relatedEntities = relatedEntitySlugs
     { label: 'Markets', href: '/markets' },
     { label: market.title },
   ]}
+  footerUpdatedBy="Collector"
+  footerType="market"
 >
   <div class="mb-8 p-6 rounded-card bg-surface border border-[var(--border)]">
     <h1 class="text-3xl font-medium text-[var(--text-primary)] leading-tight mb-4" style="letter-spacing: -0.704px">
@@ -143,10 +144,4 @@ const relatedEntities = relatedEntitySlugs
     )}
   </div>
 
-  <FooterMeta
-    updatedBy="Collector"
-    updatedAt={market.history.length > 0 ? market.history[market.history.length - 1].timestamp.slice(0, 10) : null}
-    sourceCount={relatedEntities.length + market.relatedEvents.length}
-    type="market"
-  />
 </BaseLayout>

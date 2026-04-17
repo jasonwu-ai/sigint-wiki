@@ -2,7 +2,6 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import StatusBadge from '../../components/badges/StatusBadge.astro';
 import FreshnessBadge from '../../components/badges/FreshnessBadge.astro';
-import FooterMeta from '../../components/shared/FooterMeta.astro';
 import TimelineSection from '../../components/sections/TimelineSection.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
 import MarketCard from '../../components/cards/MarketCard.astro';
@@ -38,6 +37,8 @@ const relatedMarketObjects = event.relatedMarkets
     { label: 'Events', href: '/events' },
     { label: event.title },
   ]}
+  footerUpdatedBy="Analyst"
+  footerType="event"
 >
   <div class="mb-8">
     <div class="flex flex-wrap items-start gap-3 mb-4">
@@ -116,10 +117,4 @@ const relatedMarketObjects = event.relatedMarkets
     </section>
   </div>
 
-  <FooterMeta
-    updatedBy="Analyst"
-    updatedAt={event.lastUpdated}
-    sourceCount={event.relatedEntities.length + event.relatedMarkets.length}
-    type="event"
-  />
 </BaseLayout>
