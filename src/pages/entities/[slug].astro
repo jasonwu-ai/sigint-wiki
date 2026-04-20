@@ -54,7 +54,7 @@ const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTr
     </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)]">
       {entity.pageUpdated && (
-        <FreshnessBadge lastUpdated={entity.pageUpdated} label="Page updated" isStub={isStub} />
+        <FreshnessBadge lastUpdated={entity.pageUpdated} isStub={isStub} />
       )}
       {!isStub && <span>·</span>}
       <span class="font-mono">{mentioningEvents.length} events referencing</span>

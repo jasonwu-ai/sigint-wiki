@@ -33,7 +33,7 @@ const latestTimeline = event.timeline.length > 0
       {latestTimeline && (
         <p class="text-sm text-gray-400 line-clamp-2 flex-1">{latestTimeline.replace(/^\d{4}-\d{2}-\d{2}\s*/, '')}</p>
       )}
-      {event.pageUpdated && <FreshnessBadge lastUpdated={event.pageUpdated} label="Page updated" />}
+      {event.pageUpdated && <FreshnessBadge lastUpdated={event.pageUpdated} />}
     </div>
   </article>
 </a>
