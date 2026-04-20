@@ -25,9 +25,6 @@ const xref = buildCrossReferences();
 const historySvg = generateProbabilityChart(market.history);
 
 const isAwaitingEnrichment = market.context?.toLowerCase().includes('awaiting') || false;
-const diffHours = market.lastUpdated
-  ? Math.floor((Date.now() - new Date(market.lastUpdated).getTime()) / (1000 * 60 * 60))
-  : null;
 
 const relatedEntitySlugs = [...new Set(
   market.relatedEvents.flatMap(eventSlug => {
@@ -61,9 +58,8 @@ const relatedEntities = relatedEntitySlugs
       <AIAuthoredBadge />
     </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)] font-mono">
-      <FreshnessBadge lastUpdated={market.lastUpdated} />
-      {diffHours !== null && (
-        <span>Updated {diffHours} hours ago</span>
+      {market.lastUpdated && (
+        <FreshnessBadge lastUpdated={market.lastUpdated} />
       )}
       <span>·</span>
       <span>{market.volume} volume</span>
@@ -98,11 +94,13 @@ const relatedEntities = relatedEntitySlugs
       </div>
     )}
 
-    <!-- Polymarket ID -->
-    <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
-      <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
-      <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
-    </div>
+    <!-- Polymarket ID (only show if meaningful) -->
+    {market.polymarketId && market.polymarketId.toLowerCase() !== 'unknown' && !/^\s*$/.test(market.polymarketId) && (
+      <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
+        <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
+        <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
+      </div>
+    )}
 
     <!-- Data Points -->
     <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">

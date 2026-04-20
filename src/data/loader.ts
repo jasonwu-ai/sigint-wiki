@@ -67,15 +67,29 @@ function extractLatestDateFromRaw(raw: string): string | null {
   return matches.reduce((a, b) => (a > b ? a : b));
 }
 
+/** Check if an entity has meaningful content beyond title and type */
+function isEntityStub(sections: Map<string, string>): boolean {
+  const affiliations = sections.get('affiliations')?.trim();
+  const objectives = sections.get('objectives')?.trim();
+  const claims = sections.get('claims & track record')?.trim();
+  const divergences = sections.get('divergences')?.trim();
+  // Has meaningful content if any section has substantive text (>30 chars = more than just a name)
+  const hasSubstantialContent = [affiliations, objectives, claims, divergences]
+    .some((s) => s !== null && s !== undefined && s.length > 30);
+  return !hasSubstantialContent;
+}
+
 export function loadAllEvents(): WikiEvent[] {
   const dir = path.join(DATA_ROOT, 'wiki', 'events');
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
+    const timeline = parseBulletList(sections, 'timeline');
 
     return {
       slug,
@@ -83,11 +97,11 @@ export function loadAllEvents(): WikiEvent[] {
       status: parseSingleLine(sections, 'status'),
       theatre: parseSingleLine(sections, 'theatre'),
       themes: parseCommaList(sections, 'themes'),
-      timeline: parseBulletList(sections, 'timeline'),
+      timeline,
       narrativeDivergence: parseTextBlock(sections, 'narrative divergence'),
       relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities')),
       relatedMarkets: cleanBulletList(parseBulletList(sections, 'related markets')),
-      lastUpdated: extractLatestDateFromTimeline(parseBulletList(sections, 'timeline')),
+      lastUpdated: extractLatestDateFromTimeline(timeline),
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -97,10 +111,17 @@ export function loadAllEntities(): WikiEntity[] {
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
+
+    // Stubs should not show a freshness badge — the date in the file is just
+    // a source attribution, not evidence of meaningful content updates.
+    const rawLastUpdated = extractLatestDateFromRaw(raw);
+    const entityIsStub = isEntityStub(sections);
+    const lastUpdated = entityIsStub ? null : rawLastUpdated;
 
     return {
       slug,
@@ -111,7 +132,7 @@ export function loadAllEntities(): WikiEntity[] {
       claimsAndTrackRecord: parseTextBlock(sections, 'claims & track record'),
       divergences: parseTextBlock(sections, 'divergences'),
       connections: parseTextBlock(sections, 'connections'),
-      lastUpdated: extractLatestDateFromRaw(raw),
+      lastUpdated,
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -123,7 +144,8 @@ export function loadAllMarkets(): WikiMarket[] {
   const moversEndDate = loadEndDateLookup();
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
@@ -186,7 +208,8 @@ export function loadAllNarratives(): WikiNarrative[] {
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);

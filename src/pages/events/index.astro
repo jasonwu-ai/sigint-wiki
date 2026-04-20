@@ -6,9 +6,9 @@ import { loadAllEvents } from '../../data/loader';
 
 const events = loadAllEvents();
 
-const statuses = [...new Set(events.map((e) => e.status))].sort();
+const statuses = [...new Set(events.map((e) => e.status))].filter((s) => s && s.toLowerCase() !== 'unknown').sort();
 const theatres = [...new Set(events.map((e) => e.theatre))].filter(Boolean).sort();
-const allThemes = [...new Set(events.flatMap((e) => e.themes))].sort();
+const allThemes = [...new Set(events.flatMap((e) => e.themes))].filter((t) => t.trim() !== '').sort();
 ---
 
 <BaseLayout title="Events" description="Geopolitical events tracked and analysed by Signal Intelligence" footerType="page" footerUpdatedBy="Collector" footerUpdatedAt={events[0]?.lastUpdated || undefined} footerSourceCount={events.length}>

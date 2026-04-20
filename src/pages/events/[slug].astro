@@ -23,10 +23,6 @@ export function getStaticPaths() {
 const { event } = Astro.props;
 const xref = buildCrossReferences();
 
-const diffHours = event.lastUpdated
-  ? Math.floor((Date.now() - new Date(event.lastUpdated).getTime()) / (1000 * 60 * 60))
-  : null;
-
 const relatedEntityObjects = event.relatedEntities
   .map(slug => xref.entityBySlug(slug))
   .filter((e): e is WikiEntity => e !== undefined);
@@ -45,7 +41,7 @@ const relatedMarketObjects = event.relatedMarkets
   ]}
   footerType="event"
   footerUpdatedBy="Analyst"
-  footerUpdatedAt={event.lastUpdated}
+  footerUpdatedAt={event.lastUpdated || undefined}
   footerSourceCount={event.relatedEntities.length + event.relatedMarkets.length}
 >
   <div class="mb-8">
@@ -53,9 +49,10 @@ const relatedMarketObjects = event.relatedMarkets
       <h1 class="text-3xl font-bold text-gray-100 leading-tight">{event.title}</h1>
       <StatusBadge status={event.status} />
       <AIAuthoredBadge />
-      <FreshnessBadge lastUpdated={event.lastUpdated} />
-      {diffHours !== null && (
-        <span class="text-sm font-mono text-gray-400">Updated {diffHours} hours ago</span>
+      {event.lastUpdated ? (
+        <FreshnessBadge lastUpdated={event.lastUpdated} />
+      ) : (
+        <span class="text-xs text-gray-600 font-mono">No date</span>
       )}
     </div>
     <div class="flex flex-wrap items-center gap-3 text-sm text-gray-400">

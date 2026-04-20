@@ -20,13 +20,13 @@ export function getStaticPaths() {
 const { entity } = Astro.props;
 const xref = buildCrossReferences();
 const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
-const diffHours = entity.lastUpdated
-  ? Math.floor((Date.now() - new Date(entity.lastUpdated).getTime()) / (1000 * 60 * 60))
-  : null;
 // Derive related events (slugs) and markets (slugs) for D3 graph from cross-references
 const relatedEvents = mentioningEvents.map(e => e.slug);
 // Collect unique market slugs from all events that mention this entity
 const relatedMarkets = [...new Set(mentioningEvents.flatMap(e => e.relatedMarkets))];
+
+// An entity is a "stub" if it has no meaningful content beyond title and type
+const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTrackRecord;
 ---
 
 <BaseLayout
@@ -53,10 +53,11 @@ const relatedMarkets = [...new Set(mentioningEvents.flatMap(e => e.relatedMarket
       )}
     </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)]">
-      <FreshnessBadge lastUpdated={entity.lastUpdated} />
-      {diffHours !== null && (
-        <span class="font-mono">Updated {diffHours} hours ago</span>
-      )}
+      {isStub ? (
+        <span class="text-[var(--text-muted)] italic">Profile pending</span>
+      ) : entity.lastUpdated ? (
+        <FreshnessBadge lastUpdated={entity.lastUpdated} />
+      ) : null}
       <span>·</span>
       <span class="font-mono">{mentioningEvents.length} events referencing</span>
     </div>

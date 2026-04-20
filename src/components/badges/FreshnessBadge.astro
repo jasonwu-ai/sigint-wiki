@@ -6,10 +6,14 @@ interface Props {
 
 const { lastUpdated, showLabel = true } = Astro.props;
 
-function getFreshness(dateStr: string | null): { color: string; label: string; dot: string } {
-  if (!dateStr) return { color: 'var(--stale)', label: 'Unknown', dot: 'bg-stale' };
-  
-  const date = new Date(dateStr);
+// Don't render anything if lastUpdated is null
+if (!lastUpdated) return;
+
+function getFreshness(dateStr: string): { color: string; label: string; dot: string } {
+  // Clean up malformed dates (e.g. "2026-04-17)" with trailing paren)
+  const cleaned = dateStr.replace(/\).*$/, '').trim();
+  const date = new Date(cleaned);
+  if (isNaN(date.getTime())) return { color: 'var(--stale)', label: 'Date unknown', dot: 'bg-stale' };
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffHours = diffMs / (1000 * 60 * 60);

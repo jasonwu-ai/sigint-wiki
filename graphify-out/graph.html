@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - /home/hermes/sigint-wiki/graphify-out/graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">48 nodes &middot; 69 edges &middot; 11 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "home_hermes_sigint_wiki_tailwind_config_mjs", "label": "tailwind.config.mjs", "color": {"background": "#9C755F", "border": "#9C755F", "highlight": {"background": "#ffffff", "border": "#9C755F"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "tailwind.config.mjs", "community": 8, "community_name": "Community 8", "source_file": "/home/hermes/sigint-wiki/tailwind.config.mjs", "file_type": "code", "degree": 0}, {"id": "home_hermes_sigint_wiki_astro_config_mjs", "label": "astro.config.mjs", "color": {"background": "#BAB0AC", "border": "#BAB0AC", "highlight": {"background": "#ffffff", "border": "#BAB0AC"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "astro.config.mjs", "community": 9, "community_name": "Community 9", "source_file": "/home/hermes/sigint-wiki/astro.config.mjs", "file_type": "code", "degree": 0}, {"id": "home_hermes_sigint_wiki_src_data_resolvers_ts", "label": "resolvers.ts", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "resolvers.ts", "community": 3, "community_name": "Community 3", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 5}, {"id": "resolvers_buildcrossreferences", "label": "buildCrossReferences()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "buildCrossReferences()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 5}, {"id": "resolvers_toslugform", "label": "toSlugForm()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "toSlugForm()", "community": 3, "community_name": "Community 3", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 2}, {"id": "resolvers_humanize", "label": "humanize()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "humanize()", "community": 3, "community_name": "Community 3", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 2}, {"id": "resolvers_tryresolve", "label": "tryResolve()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "tryResolve()", "community": 3, "community_name": "Community 3", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 2}, {"id": "resolvers_resolveslug", "label": "resolveSlug()", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "resolveSlug()", "community": 3, "community_name": "Community 3", "source_file": "/home/hermes/sigint-wiki/src/data/resolvers.ts", "file_type": "code", "degree": 4}, {"id": "home_hermes_sigint_wiki_src_data_parser_ts", "label": "parser.ts", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 25.0, "font": {"size": 12, "color": "#ffffff"}, "title": "parser.ts", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 10}, {"id": "parser_parsesectionmarkdown", "label": "parseSectionMarkdown()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "parseSectionMarkdown()", "community": 4, "community_name": "Community 4", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 3}, {"id": "parser_extracttitle", "label": "extractTitle()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "extractTitle()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 3}, {"id": "parser_parsesingleline", "label": "parseSingleLine()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseSingleLine()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parsecommalist", "label": "parseCommaList()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseCommaList()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parsebulletlist", "label": "parseBulletList()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseBulletList()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parsetextblock", "label": "parseTextBlock()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "parseTextBlock()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 2}, {"id": "parser_parseprobability", "label": "parseProbability()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseProbability()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parsehistoryentry", "label": "parseHistoryEntry()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseHistoryEntry()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parsevolume", "label": "parseVolume()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseVolume()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "parser_parseenddatefromtitle", "label": "parseEndDateFromTitle()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "parseEndDateFromTitle()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/parser.ts", "file_type": "code", "degree": 1}, {"id": "home_hermes_sigint_wiki_src_data_loader_ts", "label": "loader.ts", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "loader.ts", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 20}, {"id": "loader_readdir", "label": "readDir()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 20.5, "font": {"size": 12, "color": "#ffffff"}, "title": "readDir()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 7}, {"id": "loader_readfile", "label": "readFile()", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "readFile()", "community": 7, "community_name": "Community 7", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 5}, {"id": "loader_slugfromfilename", "label": "slugFromFilename()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "slugFromFilename()", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 1}, {"id": "loader_cleanbulletlist", "label": "cleanBulletList()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "cleanBulletList()", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 1}, {"id": "loader_extractlatestdatefromtimeline", "label": "extractLatestDateFromTimeline()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "extractLatestDateFromTimeline()", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 1}, {"id": "loader_extractlatestdatefromraw", "label": "extractLatestDateFromRaw()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "extractLatestDateFromRaw()", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 1}, {"id": "loader_loadallevents", "label": "loadAllEvents()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "loadAllEvents()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 3}, {"id": "loader_loadallentities", "label": "loadAllEntities()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "loadAllEntities()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 3}, {"id": "loader_loadallmarkets", "label": "loadAllMarkets()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 16.0, "font": {"size": 12, "color": "#ffffff"}, "title": "loadAllMarkets()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 4}, {"id": "loader_loadenddatelookup", "label": "loadEndDateLookup()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "loadEndDateLookup()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 3}, {"id": "loader_loadallnarratives", "label": "loadAllNarratives()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "loadAllNarratives()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 3}, {"id": "loader_loadlatestbrief", "label": "loadLatestBrief()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "loadLatestBrief()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 3}, {"id": "loader_loadbriefsbydate", "label": "loadBriefsByDate()", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "loadBriefsByDate()", "community": 1, "community_name": "Community 1", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 2}, {"id": "loader_parsebrieffile", "label": "parseBriefFile()", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 19.0, "font": {"size": 12, "color": "#ffffff"}, "title": "parseBriefFile()", "community": 0, "community_name": "Community 0", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 6}, {"id": "loader_loadmarketmovers", "label": "loadMarketMovers()", "color": {"background": "#FF9DA7", "border": "#FF9DA7", "highlight": {"background": "#ffffff", "border": "#FF9DA7"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "loadMarketMovers()", "community": 7, "community_name": "Community 7", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 2}, {"id": "loader_parseyamlfrontmatter", "label": "parseYamlFrontmatter()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "parseYamlFrontmatter()", "community": 4, "community_name": "Community 4", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 2}, {"id": "loader_loadlatestdailybrief", "label": "loadLatestDailyBrief()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "loadLatestDailyBrief()", "community": 4, "community_name": "Community 4", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 2}, {"id": "loader_loaddailybriefbydate", "label": "loadDailyBriefByDate()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "loadDailyBriefByDate()", "community": 4, "community_name": "Community 4", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 2}, {"id": "loader_loadalldailybriefs", "label": "loadAllDailyBriefs()", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "loadAllDailyBriefs()", "community": 2, "community_name": "Community 2", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 1}, {"id": "loader_parsedailybrieffile", "label": "parseDailyBriefFile()", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 20.5, "font": {"size": 12, "color": "#ffffff"}, "title": "parseDailyBriefFile()", "community": 4, "community_name": "Community 4", "source_file": "/home/hermes/sigint-wiki/src/data/loader.ts", "file_type": "code", "degree": 7}, {"id": "home_hermes_sigint_wiki_src_data_types_ts", "label": "types.ts", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 10.0, "font": {"size": 0, "color": "#ffffff"}, "title": "types.ts", "community": 10, "community_name": "Community 10", "source_file": "/home/hermes/sigint-wiki/src/data/types.ts", "file_type": "code", "degree": 0}, {"id": "home_hermes_sigint_wiki_src_data_svg_chart_ts", "label": "svg-chart.ts", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 14.5, "font": {"size": 12, "color": "#ffffff"}, "title": "svg-chart.ts", "community": 5, "community_name": "Community 5", "source_file": "/home/hermes/sigint-wiki/src/data/svg-chart.ts", "file_type": "code", "degree": 3}, {"id": "svg_chart_generateprobabilitychart", "label": "generateProbabilityChart()", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 11.5, "font": {"size": 0, "color": "#ffffff"}, "title": "generateProbabilityChart()", "community": 5, "community_name": "Community 5", "source_file": "/home/hermes/sigint-wiki/src/data/svg-chart.ts", "file_type": "code", "degree": 1}, {"id": "svg_chart_formatvolume", "label": "formatVolume()", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "formatVolume()", "community": 5, "community_name": "Community 5", "source_file": "/home/hermes/sigint-wiki/src/data/svg-chart.ts", "file_type": "code", "degree": 2}, {"id": "svg_chart_formatmarketmovervolume", "label": "formatMarketMoverVolume()", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "formatMarketMoverVolume()", "community": 5, "community_name": "Community 5", "source_file": "/home/hermes/sigint-wiki/src/data/svg-chart.ts", "file_type": "code", "degree": 2}, {"id": "home_hermes_sigint_wiki_src_scripts_graph_ts", "label": "graph.ts", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "graph.ts", "community": 6, "community_name": "Community 6", "source_file": "/home/hermes/sigint-wiki/src/scripts/graph.ts", "file_type": "code", "degree": 2}, {"id": "graph_initrelationshipgraph", "label": "initRelationshipGraph()", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "initRelationshipGraph()", "community": 6, "community_name": "Community 6", "source_file": "/home/hermes/sigint-wiki/src/scripts/graph.ts", "file_type": "code", "degree": 2}, {"id": "graph_drag", "label": "drag()", "color": {"background": "#B07AA1", "border": "#B07AA1", "highlight": {"background": "#ffffff", "border": "#B07AA1"}}, "size": 13.0, "font": {"size": 0, "color": "#ffffff"}, "title": "drag()", "community": 6, "community_name": "Community 6", "source_file": "/home/hermes/sigint-wiki/src/scripts/graph.ts", "file_type": "code", "degree": 2}];
+const RAW_EDGES = [{"from": "home_hermes_sigint_wiki_src_data_resolvers_ts", "to": "resolvers_buildcrossreferences", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_resolvers_ts", "to": "resolvers_toslugform", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_resolvers_ts", "to": "resolvers_humanize", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_resolvers_ts", "to": "resolvers_tryresolve", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_resolvers_ts", "to": "resolvers_resolveslug", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "resolvers_buildcrossreferences", "to": "loader_loadallevents", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "resolvers_buildcrossreferences", "to": "loader_loadallentities", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "resolvers_buildcrossreferences", "to": "loader_loadallmarkets", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "resolvers_buildcrossreferences", "to": "loader_loadallnarratives", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "resolvers_toslugform", "to": "resolvers_resolveslug", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "resolvers_humanize", "to": "resolvers_resolveslug", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "resolvers_tryresolve", "to": "resolvers_resolveslug", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsesectionmarkdown", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_extracttitle", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsesingleline", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsecommalist", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsebulletlist", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsetextblock", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parseprobability", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsehistoryentry", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parsevolume", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_parser_ts", "to": "parser_parseenddatefromtitle", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "parser_parsesectionmarkdown", "to": "loader_parsebrieffile", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "parser_parsesectionmarkdown", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "parser_extracttitle", "to": "loader_parsebrieffile", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "parser_extracttitle", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "parser_parsetextblock", "to": "loader_parsebrieffile", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_readdir", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_readfile", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_slugfromfilename", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_cleanbulletlist", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_extractlatestdatefromtimeline", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_extractlatestdatefromraw", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadallevents", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadallentities", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadallmarkets", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadenddatelookup", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadallnarratives", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadlatestbrief", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadbriefsbydate", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_parsebrieffile", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadmarketmovers", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_parseyamlfrontmatter", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadlatestdailybrief", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loaddailybriefbydate", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_loadalldailybriefs", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_loader_ts", "to": "loader_parsedailybrieffile", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadallevents", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadallentities", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadallmarkets", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadallnarratives", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadlatestbrief", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readdir", "to": "loader_loadbriefsbydate", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readfile", "to": "loader_loadenddatelookup", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readfile", "to": "loader_parsebrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readfile", "to": "loader_loadmarketmovers", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_readfile", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_loadallmarkets", "to": "loader_loadenddatelookup", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_loadlatestbrief", "to": "loader_parsebrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_parseyamlfrontmatter", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_loadlatestdailybrief", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "loader_loaddailybriefbydate", "to": "loader_parsedailybrieffile", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_svg_chart_ts", "to": "svg_chart_generateprobabilitychart", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_svg_chart_ts", "to": "svg_chart_formatvolume", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_data_svg_chart_ts", "to": "svg_chart_formatmarketmovervolume", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "svg_chart_formatvolume", "to": "svg_chart_formatmarketmovervolume", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_scripts_graph_ts", "to": "graph_initrelationshipgraph", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "home_hermes_sigint_wiki_src_scripts_graph_ts", "to": "graph_drag", "label": "contains", "title": "contains [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "graph_initrelationshipgraph", "to": "graph_drag", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "Community 0", "count": 12}, {"cid": 1, "color": "#F28E2B", "label": "Community 1", "count": 8}, {"cid": 2, "color": "#E15759", "label": "Community 2", "count": 6}, {"cid": 3, "color": "#76B7B2", "label": "Community 3", "count": 5}, {"cid": 4, "color": "#59A14F", "label": "Community 4", "count": 5}, {"cid": 5, "color": "#EDC948", "label": "Community 5", "count": 4}, {"cid": 6, "color": "#B07AA1", "label": "Community 6", "count": 3}, {"cid": 7, "color": "#FF9DA7", "label": "Community 7", "count": 2}, {"cid": 8, "color": "#9C755F", "label": "Community 8", "count": 1}, {"cid": 9, "color": "#BAB0AC", "label": "Community 9", "count": 1}, {"cid": 10, "color": "#4E79A7", "label": "Community 10", "count": 1}];
+
+// HTML-escape helper — prevents XSS when injecting graph data into innerHTML
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${esc(color)}" onclick="focusNode(${JSON.stringify(nid)})">${esc(nb ? nb.label : nid)}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${esc(n.label)}</b></div>
+    <div class="field">Type: ${esc(n._file_type || 'unknown')}</div>
+    <div class="field">Community: ${esc(n._community_name)}</div>
+    <div class="field">Source: ${esc(n._source_file || '-')}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+// Track hovered node — hover detection is more reliable than click params
+let hoveredNodeId = null;
+network.on('hoverNode', params => {
+  hoveredNodeId = params.node;
+  container.style.cursor = 'pointer';
+});
+network.on('blurNode', () => {
+  hoveredNodeId = null;
+  container.style.cursor = 'default';
+});
+container.addEventListener('click', () => {
+  if (hoveredNodeId !== null) {
+    showInfo(hoveredNodeId);
+    network.selectNodes([hoveredNodeId]);
+  }
+});
+network.on('click', params => {
+  if (params.nodes.length > 0) {
+    showInfo(params.nodes[0]);
+  } else if (hoveredNodeId === null) {
+    document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+  }
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.onclick = () => {
+    if (hiddenCommunities.has(c.cid)) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: hiddenCommunities.has(c.cid) }));
+    nodesDS.update(updates);
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [];
+// afterDrawing passes ctx already transformed to network coordinate space.
+// Draw node positions raw — no manual pan/zoom/DPR math needed.
+network.on('afterDrawing', function(ctx) {
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        // Centroid and expanded hull in network coordinates
+        const cx = positions.reduce((s, p) => s + p.x, 0) / positions.length;
+        const cy = positions.reduce((s, p) => s + p.y, 0) / positions.length;
+        const expanded = positions.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+});
+</script>
+</body>
+</html>

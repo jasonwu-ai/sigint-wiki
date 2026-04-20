@@ -39,8 +39,41 @@ function timeAgo(dateStr: string, timeStr: string): string {
   return `${diffDays}d ago`;
 }
 
-const lastUpdatedText = brief
-  ? `Last updated ${timeAgo(brief.date, brief.time)}`
+// Relative time from just a date string
+function relativeDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr + 'T00:00:00Z');
+    if (isNaN(d.getTime())) return dateStr;
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const diffDays = Math.floor((today.getTime() - target.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) return dateStr; // future date — show raw
+    if (diffDays === 0) return 'today';
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch {
+    return dateStr;
+  }
+}
+
+// Find the most recent data date across all content types
+function findLatestDataDate(): string | null {
+  const allDates: string[] = [];
+  for (const e of events) { if (e.lastUpdated) allDates.push(e.lastUpdated); }
+  for (const e of entities) { if (e.lastUpdated) allDates.push(e.lastUpdated); }
+  for (const m of markets) { if (m.lastUpdated) allDates.push(m.lastUpdated); }
+  if (allDates.length === 0) return null;
+  return allDates.reduce((a, b) => a > b ? a : b);
+}
+
+const latestDataDate = findLatestDataDate();
+
+// Use the actual latest data date for the "last updated" label, falling back to brief date
+const displayDate = latestDataDate || brief?.date || null;
+const lastUpdatedText = displayDate
+  ? `Last updated ${relativeDate(displayDate)}${brief?.time ? ` · Brief ${timeAgo(brief.date, brief.time)}` : ''}`
   : 'Data refreshing shortly';
 ---
 
@@ -49,7 +82,7 @@ const lastUpdatedText = brief
   description="Real-time geopolitical event tracking, prediction market analysis, and narrative intelligence"
   footerType="page"
   footerUpdatedBy="System"
-  footerUpdatedAt={brief?.date || null}
+  footerUpdatedAt={displayDate || undefined}
   footerSourceCount={events.length + entities.length + markets.length}
 >
 
