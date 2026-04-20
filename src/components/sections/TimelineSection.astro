@@ -9,6 +9,10 @@ function parseTimelineEntry(entry: string): { date: string; sortKey: string; tex
   const time = dtMatch && dtMatch[2] ? dtMatch[2] : '00:00';
   const sortKey = date ? date + 'T' + time : '';
   let rest = dtMatch ? entry.slice(dtMatch[0].length) : entry;
+
+  // Clean up malformed date artifacts (e.g. "2026-04-17) Unknown" -> strip leading ")" and whitespace)
+  rest = rest.replace(/^\)\s*/, '');
+
   const dashIndex = rest.lastIndexOf('—');
   let text = rest;
   let attribution = '';

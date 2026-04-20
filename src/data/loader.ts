@@ -72,10 +72,12 @@ export function loadAllEvents(): WikiEvent[] {
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
+    const timeline = parseBulletList(sections, 'timeline');
 
     return {
       slug,
@@ -83,11 +85,12 @@ export function loadAllEvents(): WikiEvent[] {
       status: parseSingleLine(sections, 'status'),
       theatre: parseSingleLine(sections, 'theatre'),
       themes: parseCommaList(sections, 'themes'),
-      timeline: parseBulletList(sections, 'timeline'),
+      timeline,
       narrativeDivergence: parseTextBlock(sections, 'narrative divergence'),
       relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities')),
       relatedMarkets: cleanBulletList(parseBulletList(sections, 'related markets')),
-      lastUpdated: extractLatestDateFromTimeline(parseBulletList(sections, 'timeline')),
+      lastUpdated: extractLatestDateFromTimeline(timeline),
+      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -97,7 +100,8 @@ export function loadAllEntities(): WikiEntity[] {
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
@@ -112,6 +116,7 @@ export function loadAllEntities(): WikiEntity[] {
       divergences: parseTextBlock(sections, 'divergences'),
       connections: parseTextBlock(sections, 'connections'),
       lastUpdated: extractLatestDateFromRaw(raw),
+      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -123,7 +128,8 @@ export function loadAllMarkets(): WikiMarket[] {
   const moversEndDate = loadEndDateLookup();
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
@@ -158,6 +164,7 @@ export function loadAllMarkets(): WikiMarket[] {
       endDate: endDate ? endDate.toISOString() : null,
       expired: endDate !== null && endDate < now,
       lastUpdated: extractLatestDateFromRaw(raw),
+      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   });
 }
@@ -186,7 +193,8 @@ export function loadAllNarratives(): WikiNarrative[] {
   const files = readDir(dir);
 
   return files.map((file) => {
-    const raw = readFile(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const raw = readFile(filePath);
     const slug = slugFromFilename(file);
     const title = extractTitle(raw);
     const sections = parseSectionMarkdown(raw);
@@ -201,6 +209,7 @@ export function loadAllNarratives(): WikiNarrative[] {
       counterNarratives: parseBulletList(sections, 'counter-narratives'),
       relatedEvents: cleanBulletList(parseBulletList(sections, 'related events')),
       lastUpdated: extractLatestDateFromRaw(raw),
+      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   });
 }

@@ -8,7 +8,8 @@ export interface WikiEvent {
   narrativeDivergence: string | null;
   relatedEntities: string[];
   relatedMarkets: string[];
-  lastUpdated: string | null;
+  lastUpdated: string | null; // Latest timeline entry date (event occurrence)
+  pageUpdated: string | null; // When the wiki page was last modified
 }
 
 export interface WikiEntity {
@@ -20,7 +21,8 @@ export interface WikiEntity {
   claimsAndTrackRecord: string | null;
   divergences: string | null;
   connections: string | null;
-  lastUpdated: string | null;
+  lastUpdated: string | null; // Latest date found in entity file (if any)
+  pageUpdated: string | null; // When the wiki page was last modified
 }
 
 export interface WikiMarket {
@@ -36,6 +38,7 @@ export interface WikiMarket {
   endDate: string | null;
   expired: boolean;
   lastUpdated: string | null;
+  pageUpdated: string | null; // When the wiki page was last modified
 }
 
 export interface WikiNarrative {
@@ -48,6 +51,7 @@ export interface WikiNarrative {
   counterNarratives: string[];
   relatedEvents: string[];
   lastUpdated: string | null;
+  pageUpdated: string | null; // When the wiki page was last modified
 }
 
 export interface IntelligenceBrief {
