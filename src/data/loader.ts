@@ -17,7 +17,13 @@ import {
   normalizeEventStatus,
   normalizeTheatre,
   normalizeThemes,
+  isAlternateSlug,
+  resolveCanonicalSlug,
+  ENTITY_ALIASES,
 } from './normalizers';
+
+/** Re-export for use in redirect pages */
+export { ENTITY_ALIASES } from './normalizers';
 import type {
   WikiEvent,
   WikiEntity,
@@ -105,7 +111,8 @@ export function loadAllEvents(): WikiEvent[] {
       themes: normalizeThemes(parseCommaList(sections, 'themes')),
       timeline,
       narrativeDivergence: parseTextBlock(sections, 'narrative divergence'),
-      relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities')),
+      relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities'))
+        .map((e) => resolveCanonicalSlug(e)),
       relatedMarkets: cleanBulletList(parseBulletList(sections, 'related markets')),
       lastUpdated: extractLatestDateFromTimeline(timeline),
     };
@@ -116,7 +123,8 @@ export function loadAllEntities(): WikiEntity[] {
   const dir = path.join(DATA_ROOT, 'wiki', 'entities');
   const files = readDir(dir);
 
-  return files.map((file) => {
+  // Load all entities from source files
+  const allParsed = files.map((file) => {
     const filePath = path.join(dir, file);
     const raw = readFile(filePath);
     const slug = slugFromFilename(file);
@@ -140,7 +148,62 @@ export function loadAllEntities(): WikiEntity[] {
       connections: parseTextBlock(sections, 'connections'),
       lastUpdated,
     };
-  }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
+  });
+
+  // ── Deduplicate entities (Issue #43) ──
+  // Separate canonical entities from alternate (duplicate) ones
+  const canonicalEntities: WikiEntity[] = [];
+  const alternateEntities: Map<string, WikiEntity> = new Map();
+
+  for (const entity of allParsed) {
+    if (isAlternateSlug(entity.slug)) {
+      alternateEntities.set(entity.slug, entity);
+    } else {
+      canonicalEntities.push(entity);
+    }
+  }
+
+  // Merge content from alternate entities into their canonical counterparts.
+  // For each field, prefer the canonical entity's value if it exists and is
+  // substantive; otherwise, use the alternate entity's value.
+  for (const entity of canonicalEntities) {
+    // Find all alternates that map to this canonical slug
+    const alternates: WikiEntity[] = [];
+    for (const [altSlug, canonicalSlug] of Object.entries(ENTITY_ALIASES)) {
+      if (canonicalSlug.toLowerCase() === entity.slug.toLowerCase()) {
+        const alt = alternateEntities.get(altSlug);
+        if (alt) alternates.push(alt);
+      }
+    }
+
+    if (alternates.length === 0) continue;
+
+    // Merge: for each field, keep the longest/most substantive value
+    const fields: (keyof Pick<WikiEntity, 'affiliations' | 'objectives' | 'claimsAndTrackRecord' | 'divergences' | 'connections'>)[] =
+      ['affiliations', 'objectives', 'claimsAndTrackRecord', 'divergences', 'connections'];
+
+    for (const field of fields) {
+      const currentVal = entity[field];
+      // Find the best value across all alternates (longest non-null value)
+      let bestVal = currentVal;
+      for (const alt of alternates) {
+        const altVal = alt[field];
+        if (altVal && (!bestVal || altVal.length > bestVal.length)) {
+          bestVal = altVal;
+        }
+      }
+      (entity as Record<string, string | null>)[field] = bestVal;
+    }
+
+    // Use the most recent lastUpdated across all duplicates
+    for (const alt of alternates) {
+      if (alt.lastUpdated && (!entity.lastUpdated || alt.lastUpdated > entity.lastUpdated)) {
+        entity.lastUpdated = alt.lastUpdated;
+      }
+    }
+  }
+
+  return canonicalEntities.sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
 
 export function loadAllMarkets(): WikiMarket[] {
