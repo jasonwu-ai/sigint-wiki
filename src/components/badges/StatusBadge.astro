@@ -15,6 +15,10 @@ const statusConfig: Record<string, { bg: string; text: string; dot: string }> = 
 };
 
 const normalized = statusKeyword.toLowerCase().trim();
+
+// Don't render anything for empty or "unknown" statuses — they add no information
+if (!normalized || normalized === 'unknown') return;
+
 const config = statusConfig[normalized] || { bg: 'bg-gray-500/15', text: 'text-gray-400', dot: 'bg-gray-400' };
 
 const displayLabel = normalized === 'active (strain)' ? 'Active · Strain' : statusKeyword.charAt(0).toUpperCase() + statusKeyword.slice(1);
