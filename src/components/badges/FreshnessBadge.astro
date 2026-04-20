@@ -10,7 +10,9 @@ const { lastUpdated, showLabel = true } = Astro.props;
 if (!lastUpdated) return;
 
 function getFreshness(dateStr: string): { color: string; label: string; dot: string } {
-  const date = new Date(dateStr);
+  // Clean up malformed dates (e.g. "2026-04-17)" with trailing paren)
+  const cleaned = dateStr.replace(/\).*$/, '').trim();
+  const date = new Date(cleaned);
   if (isNaN(date.getTime())) return { color: 'var(--stale)', label: 'Date unknown', dot: 'bg-stale' };
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();

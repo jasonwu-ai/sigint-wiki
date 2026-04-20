@@ -11,6 +11,8 @@ const { entity } = Astro.props;
 
 // An entity is a "stub" if it has no meaningful content beyond title and type
 const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTrackRecord;
+// Also treat as stub if there's no freshness date (loader sets null for minimal-content entities)
+const effectivelyStub = isStub || !entity.lastUpdated;
 ---
 
 <a href={`/entities/${entity.slug}`} class="block group">
@@ -19,8 +21,8 @@ const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTr
       <h3 class="text-gray-100 font-semibold text-base leading-snug group-hover:text-brand-400 transition-colors">{entity.title}</h3>
       <TypeBadge type={entity.type} />
     </div>
-    {isStub ? (
-      <p class="text-sm text-gray-600 italic">Profile pending enrichment</p>
+    {effectivelyStub ? (
+      <p class="text-sm text-gray-600 italic">Profile pending</p>
     ) : (
       <>
         {entity.affiliations && <p class="text-sm text-gray-400">{entity.affiliations}</p>}

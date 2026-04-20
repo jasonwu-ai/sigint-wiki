@@ -10,8 +10,11 @@ function parseTimelineEntry(entry: string): { date: string; sortKey: string; tex
   const sortKey = date ? date + 'T' + time : '';
   let rest = dtMatch ? entry.slice(dtMatch[0].length) : entry;
 
-  // Clean up malformed date artifacts (e.g. "2026-04-17) Unknown" -> strip leading ")" and whitespace)
+  // Clean up malformed date artifacts:
+  // 1. Closing paren after date (e.g. "2026-04-17) Unknown" from "(Updated 2026-04-17)")
   rest = rest.replace(/^\)\s*/, '');
+  // 2. Leading punctuation artifacts
+  rest = rest.replace(/^[:;,–—]\s*/, '');
 
   const dashIndex = rest.lastIndexOf('—');
   let text = rest;

@@ -53,10 +53,12 @@ const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTr
       )}
     </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)]">
-      {entity.lastUpdated && !isStub && (
+      {isStub ? (
+        <span class="text-[var(--text-muted)] italic">Profile pending</span>
+      ) : entity.lastUpdated ? (
         <FreshnessBadge lastUpdated={entity.lastUpdated} />
-      )}
-      {!isStub && <span>·</span>}
+      ) : null}
+      <span>·</span>
       <span class="font-mono">{mentioningEvents.length} events referencing</span>
     </div>
   </div>

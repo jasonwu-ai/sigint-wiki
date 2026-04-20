@@ -94,11 +94,13 @@ const relatedEntities = relatedEntitySlugs
       </div>
     )}
 
-    <!-- Polymarket ID -->
-    <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
-      <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
-      <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
-    </div>
+    <!-- Polymarket ID (only show if meaningful) -->
+    {market.polymarketId && market.polymarketId.toLowerCase() !== 'unknown' && !/^\s*$/.test(market.polymarketId) && (
+      <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
+        <p class="text-xs text-[var(--text-faint)] uppercase tracking-wider mb-1">Polymarket ID</p>
+        <p class="text-sm font-bold font-mono text-[var(--text-primary)] break-all">{market.polymarketId}</p>
+      </div>
+    )}
 
     <!-- Data Points -->
     <div class="p-4 rounded-xl bg-surface border border-[var(--border)]">
