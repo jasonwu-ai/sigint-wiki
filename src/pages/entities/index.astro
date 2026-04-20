@@ -6,7 +6,9 @@ import { loadAllEntities } from '../../data/loader';
 
 const entities = loadAllEntities();
 
-const types = [...new Set(entities.map((e) => e.type))].filter(Boolean).sort();
+const types = [...new Set(entities.map((e) => e.type))]
+  .filter((t) => t && t !== 'Uncategorized')
+  .sort();
 ---
 
 <BaseLayout title="Entities" description="Geopolitical actors — countries, leaders, institutions, and organisations tracked by Signal Intelligence" footerType="page" footerUpdatedBy="Collector" footerSourceCount={entities.length}>

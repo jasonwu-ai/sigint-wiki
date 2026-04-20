@@ -6,8 +6,12 @@ import { loadAllEvents } from '../../data/loader';
 
 const events = loadAllEvents();
 
-const statuses = [...new Set(events.map((e) => e.status))].filter((s) => s && s.toLowerCase() !== 'unknown').sort();
-const theatres = [...new Set(events.map((e) => e.theatre))].filter(Boolean).sort();
+const statuses = [...new Set(events.map((e) => e.status))]
+  .filter((s) => s && s !== 'Unknown')
+  .sort();
+const theatres = [...new Set(events.map((e) => e.theatre))]
+  .filter((t) => t && t !== 'Uncategorized')
+  .sort();
 const allThemes = [...new Set(events.flatMap((e) => e.themes))].filter((t) => t.trim() !== '').sort();
 ---
 
