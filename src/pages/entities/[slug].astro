@@ -35,7 +35,7 @@ const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTr
   breadcrumbs={[{ label: 'Entities', href: '/entities' }, { label: entity.title }]}
   footerType="entity"
   footerUpdatedBy="Analyst"
-  footerUpdatedAt={entity.pageUpdated || undefined}
+  footerUpdatedAt={entity.lastUpdated || undefined}
   footerSourceCount={mentioningEvents.length}
 >
   <!-- Header Card -->
@@ -53,8 +53,8 @@ const isStub = !entity.affiliations && !entity.objectives && !entity.claimsAndTr
       )}
     </div>
     <div class="flex items-center gap-4 text-xs text-[var(--text-faint)]">
-      {entity.pageUpdated && (
-        <FreshnessBadge lastUpdated={entity.pageUpdated} isStub={isStub} />
+      {entity.lastUpdated && !isStub && (
+        <FreshnessBadge lastUpdated={entity.lastUpdated} />
       )}
       {!isStub && <span>·</span>}
       <span class="font-mono">{mentioningEvents.length} events referencing</span>

@@ -2,18 +2,14 @@
 interface Props {
   lastUpdated: string | null; // ISO date string 'YYYY-MM-DD'
   showLabel?: boolean;
-  isStub?: boolean; // If true, show "Profile pending" instead of misleading "Updated today"
 }
 
-const { lastUpdated, showLabel = true, isStub = false } = Astro.props;
+const { lastUpdated, showLabel = true } = Astro.props;
 
 // Don't render anything if lastUpdated is null
 if (!lastUpdated) return;
 
-// For stub entities with no real content, don't show a misleading freshness label
-if (isStub) return;
-
-function getFreshness(dateStr: string | null): { color: string; label: string; dot: string } {
+function getFreshness(dateStr: string): { color: string; label: string; dot: string } {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return { color: 'var(--stale)', label: 'Date unknown', dot: 'bg-stale' };
   const now = new Date();

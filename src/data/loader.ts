@@ -90,7 +90,6 @@ export function loadAllEvents(): WikiEvent[] {
       relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities')),
       relatedMarkets: cleanBulletList(parseBulletList(sections, 'related markets')),
       lastUpdated: extractLatestDateFromTimeline(timeline),
-      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -116,7 +115,6 @@ export function loadAllEntities(): WikiEntity[] {
       divergences: parseTextBlock(sections, 'divergences'),
       connections: parseTextBlock(sections, 'connections'),
       lastUpdated: extractLatestDateFromRaw(raw),
-      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   }).sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''));
 }
@@ -164,7 +162,6 @@ export function loadAllMarkets(): WikiMarket[] {
       endDate: endDate ? endDate.toISOString() : null,
       expired: endDate !== null && endDate < now,
       lastUpdated: extractLatestDateFromRaw(raw),
-      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   });
 }
@@ -209,7 +206,6 @@ export function loadAllNarratives(): WikiNarrative[] {
       counterNarratives: parseBulletList(sections, 'counter-narratives'),
       relatedEvents: cleanBulletList(parseBulletList(sections, 'related events')),
       lastUpdated: extractLatestDateFromRaw(raw),
-      pageUpdated: fs.statSync(filePath).mtime.toISOString().split('T')[0],
     };
   });
 }
