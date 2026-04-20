@@ -3,11 +3,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import EventCard from '../../components/cards/EventCard.astro';
 import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllEvents } from '../../data/loader';
+import { CANONICAL_EVENT_STATUSES, CANONICAL_THEATRES } from '../../data/normalizers';
 
 const events = loadAllEvents();
 
-const statuses = [...new Set(events.map((e) => e.status))].filter((s) => s && s.toLowerCase() !== 'unknown').sort();
-const theatres = [...new Set(events.map((e) => e.theatre))].filter(Boolean).sort();
+// Use the stable canonical lists from normalizers
+const statuses = [...CANONICAL_EVENT_STATUSES];
+const theatres = [...CANONICAL_THEATRES];
 const allThemes = [...new Set(events.flatMap((e) => e.themes))].filter((t) => t.trim() !== '').sort();
 ---
 

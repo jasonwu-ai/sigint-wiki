@@ -12,6 +12,12 @@ import {
   parseVolume,
   parseEndDateFromTitle,
 } from './parser';
+import {
+  normalizeEntityType,
+  normalizeEventStatus,
+  normalizeTheatre,
+  normalizeThemes,
+} from './normalizers';
 import type {
   WikiEvent,
   WikiEntity,
@@ -94,9 +100,9 @@ export function loadAllEvents(): WikiEvent[] {
     return {
       slug,
       title,
-      status: parseSingleLine(sections, 'status'),
-      theatre: parseSingleLine(sections, 'theatre'),
-      themes: parseCommaList(sections, 'themes'),
+      status: normalizeEventStatus(parseSingleLine(sections, 'status')),
+      theatre: normalizeTheatre(parseSingleLine(sections, 'theatre')),
+      themes: normalizeThemes(parseCommaList(sections, 'themes')),
       timeline,
       narrativeDivergence: parseTextBlock(sections, 'narrative divergence'),
       relatedEntities: cleanBulletList(parseBulletList(sections, 'related entities')),
@@ -126,7 +132,7 @@ export function loadAllEntities(): WikiEntity[] {
     return {
       slug,
       title,
-      type: parseSingleLine(sections, 'type'),
+      type: normalizeEntityType(parseSingleLine(sections, 'type')),
       affiliations: parseTextBlock(sections, 'affiliations'),
       objectives: parseTextBlock(sections, 'objectives'),
       claimsAndTrackRecord: parseTextBlock(sections, 'claims & track record'),

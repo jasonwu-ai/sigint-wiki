@@ -3,10 +3,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import EntityCard from '../../components/cards/EntityCard.astro';
 import AIAuthoredBadge from '../../components/badges/AIAuthoredBadge.astro';
 import { loadAllEntities } from '../../data/loader';
+import { CANONICAL_ENTITY_TYPES } from '../../data/normalizers';
 
 const entities = loadAllEntities();
 
-const types = [...new Set(entities.map((e) => e.type))].filter(Boolean).sort();
+// Use the stable canonical type list from normalizers
+const types = [...CANONICAL_ENTITY_TYPES].sort();
 ---
 
 <BaseLayout title="Entities" description="Geopolitical actors — countries, leaders, institutions, and organisations tracked by Signal Intelligence" footerType="page" footerUpdatedBy="Collector" footerSourceCount={entities.length}>
@@ -79,7 +81,7 @@ const types = [...new Set(entities.map((e) => e.type))].filter(Boolean).sort();
       const title = el.dataset.title || '';
 
       let show = true;
-      if (active.type && type !== active.type) show = false;
+      if (active.type && type.toLowerCase() !== active.type) show = false;
       if (active.search && !title.includes(active.search)) show = false;
 
       el.classList.toggle('hidden', !show);
