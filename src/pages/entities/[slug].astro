@@ -8,16 +8,40 @@ import TrackRecordSection from '../../components/sections/TrackRecordSection.ast
 import EntityConnections from '../../components/sections/EntityConnections.astro';
 import { loadAllEntities } from '../../data/loader';
 import { buildCrossReferences } from '../../data/resolvers';
+import { ENTITY_ALIASES } from '../../data/normalizers';
 
 export function getStaticPaths() {
   const entities = loadAllEntities();
-  return entities.map((entity) => ({
+  const canonicalSlugs = new Set(entities.map((e) => e.slug.toLowerCase()));
+
+  // Generate canonical entity pages
+  const paths = entities.map((entity) => ({
     params: { slug: entity.slug },
-    props: { entity },
+    props: { entity, isAlias: false, canonicalSlug: null },
   }));
+
+  // Generate redirect pages for alias slugs (Issue #43)
+  for (const [alias, canonical] of Object.entries(ENTITY_ALIASES)) {
+    // Only create redirect if the alias isn't already a canonical slug
+    // (this shouldn't happen, but be defensive)
+    if (!canonicalSlugs.has(alias.toLowerCase())) {
+      paths.push({
+        params: { slug: alias },
+        props: { entity: null, isAlias: true, canonicalSlug: canonical },
+      });
+    }
+  }
+
+  return paths;
 }
 
-const { entity } = Astro.props;
+const { entity, isAlias, canonicalSlug } = Astro.props;
+
+// Redirect alias slugs to their canonical entity page
+if (isAlias) {
+  return Astro.redirect(`/entities/${canonicalSlug}`);
+}
+
 const xref = buildCrossReferences();
 const mentioningEvents = xref.eventsMentioningEntity(entity.slug);
 // Derive related events (slugs) and markets (slugs) for D3 graph from cross-references

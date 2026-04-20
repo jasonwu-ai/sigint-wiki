@@ -1,5 +1,6 @@
 import type { WikiEvent, WikiEntity, WikiMarket, WikiNarrative, DataCategory } from './types';
 import { loadAllEvents, loadAllEntities, loadAllMarkets, loadAllNarratives } from './loader';
+import { resolveCanonicalSlug } from './normalizers';
 
 export interface SlugIndex {
   get(slug: string): { category: DataCategory; slug: string } | undefined;
@@ -36,9 +37,9 @@ export function buildCrossReferences(): CrossReferences {
 
   return {
     eventsMentioningEntity(entitySlug: string): WikiEvent[] {
-      const slug = entitySlug.toLowerCase();
+      const slug = resolveCanonicalSlug(entitySlug).toLowerCase();
       return events.filter((e) =>
-        e.relatedEntities.some((re) => re.toLowerCase() === slug)
+        e.relatedEntities.some((re) => resolveCanonicalSlug(re).toLowerCase() === slug)
       );
     },
     eventsMentioningMarket(marketSlug: string): WikiEvent[] {

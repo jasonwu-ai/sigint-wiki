@@ -375,3 +375,92 @@ export function normalizeThemes(themes: string[]): string[] {
   const normalized = themes.map(normalizeTheme).filter(Boolean);
   return [...new Set(normalized)].sort();
 }
+
+
+// ── Entity Deduplication (Issue #43) ────────────────────────────────
+
+/**
+ * Canonical slug mapping for duplicate entities.
+ *
+ * The pipeline sometimes creates multiple pages for the same real-world entity
+ * with different slug conventions:
+ *   - al-sharaa vs ahmed-al-sharaa
+ *   - netanyahu vs benjamin-netanyahu vs netanyahu-benjamin
+ *   - munir / asim-munir / munir-asim / pakistan-army-chief-munir
+ *   - etc.
+ *
+ * This map declares the canonical slug for each duplicate group. At load time,
+ * alternate slugs are redirected to the canonical entity. The canonical entity
+ * absorbs the most complete content from all its duplicates.
+ *
+ * Rules for choosing canonical slug:
+ *   1. Prefer the full-name form (e.g. benjamin-netanyahu over netanyahu)
+ *   2. Prefer the slug with the most event/market references (visibility)
+ *   3. Prefer the slug with the richest content
+ */
+export const ENTITY_ALIASES: Record<string, string> = {
+  // al-Sharaa (President of Syria)
+  'al-sharaa': 'ahmed-al-sharaa',
+
+  // Netanyahu (PM of Israel)
+  'netanyahu': 'benjamin-netanyahu',
+  'netanyahu-benjamin': 'benjamin-netanyahu',
+  'netanyahu-government': 'benjamin-netanyahu',
+
+  // Asim Munir (Pakistan Army Chief)
+  'munir': 'asim-munir',
+  'munir-asim': 'asim-munir',
+  'munir-asmad': 'asim-munir',
+  'pakistan-army-chief-munir': 'asim-munir',
+
+  // Pete Hegseth (US Defense Secretary)
+  'hegseth': 'pete-hegseth',
+
+  // Donald Trump (US President)
+  'trump': 'donald-trump',
+  'trump-donald': 'donald-trump',
+
+  // Volodymyr Zelenskyy (President of Ukraine)
+  'zelenskyy': 'volodymyr-zelenskyy',
+  'zelensky-volodymyr': 'volodymyr-zelenskyy',
+
+  // Recep Tayyip Erdoğan (President of Turkey)
+  'erdogan': 'recep-tayyip-erdogan',
+  'erdogan-recep-tayyip': 'recep-tayyip-erdogan',
+
+  // Emmanuel Macron (President of France)
+  'macron': 'emmanuel-macron',
+
+  // Giorgia Meloni (PM of Italy)
+  'meloni-giorgia': 'giorgia-meloni',
+
+  // Peter Magyar (Hungarian opposition leader)
+  'peder-magyar': 'peter-magyar',
+
+  // European Union
+  'eu-commission': 'european-union',
+};
+
+/**
+ * Set of all alternate slugs (keys in ENTITY_ALIASES).
+ * Used to filter out duplicate entities during loading.
+ */
+export const ALTERNATE_ENTITY_SLUGS: Set<string> = new Set(
+  Object.keys(ENTITY_ALIASES).map((k) => k.toLowerCase())
+);
+
+/**
+ * Resolve a slug to its canonical form.
+ * If the slug is an alias, returns the canonical slug; otherwise returns the input.
+ */
+export function resolveCanonicalSlug(slug: string): string {
+  const lower = slug.toLowerCase();
+  return ENTITY_ALIASES[lower] || slug;
+}
+
+/**
+ * Check if a slug is an alternate (non-canonical) alias.
+ */
+export function isAlternateSlug(slug: string): boolean {
+  return ALTERNATE_ENTITY_SLUGS.has(slug.toLowerCase());
+}
