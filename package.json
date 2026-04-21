@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "postbuild": "npx pagefind --site dist --glob '**/*.html'",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/tailwind": "^6.0.2",
@@ -18,6 +20,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "@types/d3": "^7.4.3"
+    "@types/d3": "^7.4.3",
+    "vitest": "^4.1.5"
   }
 }
